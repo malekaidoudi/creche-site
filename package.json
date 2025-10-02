@@ -16,7 +16,12 @@
     "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
     "lint": "npm run lint:backend && npm run lint:frontend",
     "lint:backend": "cd backend && npm run lint",
-    "lint:frontend": "cd frontend && npm run lint"
+    "lint:frontend": "cd frontend && npm run lint",
+    "deploy": "npm run build && npm run deploy:frontend",
+    "deploy:frontend": "cd frontend && npm run build && npm run deploy",
+    "start": "npm run start:backend",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm run preview"
   },
   "keywords": ["creche", "management", "nodejs", "react", "mysql"],
   "author": "Creche Management Team",

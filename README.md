@@ -233,6 +233,45 @@ cd frontend && npm test
 npm run test:coverage
 ```
 
+## 🚀 Déploiement
+
+### Déploiement rapide sur GitHub Pages
+
+```bash
+# 1. Créer un repository GitHub
+# 2. Pousser le code
+git init
+git add .
+git commit -m "Initial commit - Mima Elghalia"
+git remote add origin https://github.com/votre-username/creche-site.git
+git push -u origin main
+
+# 3. Déployer automatiquement
+./scripts/deploy-github.sh
+```
+
+### Options de déploiement
+
+- **Frontend**: GitHub Pages (gratuit)
+- **Backend**: Heroku, Railway, VPS
+- **Base de données**: MySQL sur PlanetScale, Railway, ou VPS
+
+### Configuration rapide
+
+1. **Frontend** → Automatique via GitHub Actions
+2. **Backend** → Suivre le guide dans [DEPLOYMENT.md](./DEPLOYMENT.md)
+3. **Variables d'environnement** → Configurer selon votre hébergeur
+
+**📖 Guide complet**: Voir [DEPLOYMENT.md](./DEPLOYMENT.md) pour les instructions détaillées.
+
+### Scripts disponibles
+
+```bash
+npm run deploy              # Déploiement complet
+npm run deploy:frontend     # Frontend uniquement
+./scripts/deploy-github.sh  # GitHub Pages avec vérifications
+```
+
 ## 📱 Responsive Design
 
 L'application est entièrement responsive et optimisée pour :

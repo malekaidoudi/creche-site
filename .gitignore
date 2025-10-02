@@ -113,3 +113,18 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# Deployment
+.vercel
+.netlify
+
+# Backups
+backups/
+*.sql
+
+# Temporary files
+tmp/
+temp/
+
+# PM2
+.pm2/
