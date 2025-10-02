@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Menu, X, ChevronDown, Globe } from 'lucide-react'
 import { useLanguage } from '../../hooks/useLanguage'
 import LanguageToggle from '../ui/LanguageToggle'
-import { ImageWithFallback, defaultImages } from '../../utils/imageUtils'
+import { ImageWithFallback, defaultImages } from '../../utils/imageUtils.jsx'
 import { useAuth } from '../../hooks/useAuth'
 
 const PublicHeader = () => {

@@ -6,7 +6,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { useLanguage } from '../../hooks/useLanguage'
 import LanguageToggle from '../ui/LanguageToggle'
 import UserMenu from '../ui/UserMenu'
-import { ImageWithFallback, defaultImages } from '../../utils/imageUtils'
+import { ImageWithFallback, defaultImages } from '../../utils/imageUtils.jsx'
 
 const DashboardHeader = () => {
   const { t } = useTranslation()
