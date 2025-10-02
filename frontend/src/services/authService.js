@@ -1,4 +1,4 @@
-import { apiRequest } from './apiRequest'
+import { apiRequest } from './api'
 import { authenticateDemo, demoAccounts } from '../data/demoAccounts'
 
 export const authService = {
