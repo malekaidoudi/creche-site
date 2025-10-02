@@ -6,13 +6,13 @@ export const authService = {
   login: async (credentials) => {
     // En mode production (GitHub Pages), utiliser les comptes de démo
     if (import.meta.env.PROD && !import.meta.env.VITE_API_URL) {
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         setTimeout(() => {
           const result = authenticateDemo(credentials.email, credentials.password)
           if (result.success) {
             resolve({ data: result.data })
           } else {
-            throw new Error(result.error)
+            reject(new Error(result.error))
           }
         }, 1000) // Simuler un délai réseau
       })

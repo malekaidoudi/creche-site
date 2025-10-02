@@ -47,7 +47,7 @@ const DemoAccountsInfo = () => {
   ]
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl shadow-lg border border-blue-200 p-6 mb-8">
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl shadow-lg border border-blue-200 p-4 sm:p-6 mb-8 w-full max-w-7xl mx-auto">
       {/* Header */}
       <div className="text-center mb-6">
         <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
@@ -69,11 +69,11 @@ const DemoAccountsInfo = () => {
       </div>
 
       {/* Accounts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-6 max-w-6xl mx-auto">
         {accounts.map(({ type, data, bgColor, borderColor, textColor, icon, description }) => (
           <div
             key={type}
-            className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden border border-gray-100"
+            className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden border border-gray-100 w-full max-w-sm mx-auto"
           >
             {/* Card Header */}
             <div className={`${bgColor} px-6 py-4 border-b border-gray-100`}>

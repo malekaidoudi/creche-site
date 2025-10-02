@@ -133,7 +133,14 @@ export function AuthProvider({ children }) {
       toast.success('Connexion réussie')
       return response
     } catch (error) {
-      const errorMessage = error.response?.data?.error || 'Erreur de connexion'
+      let errorMessage = 'Erreur de connexion'
+      
+      // En mode démo, afficher le message d'erreur spécifique
+      if (import.meta.env.PROD && !import.meta.env.VITE_API_URL) {
+        errorMessage = error.message || 'Email ou mot de passe incorrect'
+      } else {
+        errorMessage = error.response?.data?.error || 'Erreur de connexion, vérifiez votre connexion internet'
+      }
       
       dispatch({
         type: AUTH_ACTIONS.LOGIN_FAILURE,
