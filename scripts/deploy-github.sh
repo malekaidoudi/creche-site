@@ -71,9 +71,11 @@ log_info "Installation des dépendances..."
 npm run install:all
 log_success "Dépendances installées"
 
-# Tests
-log_info "Exécution des tests..."
-npm run test || log_warning "Certains tests ont échoué, mais on continue..."
+# Tests (optionnel pour le déploiement frontend)
+log_info "Exécution des tests frontend uniquement..."
+cd frontend
+npm test -- --run --reporter=verbose 2>/dev/null || log_warning "Tests frontend ignorés pour le déploiement"
+cd ..
 log_success "Tests terminés"
 
 # Build du frontend

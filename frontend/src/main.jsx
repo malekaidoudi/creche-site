@@ -27,7 +27,7 @@ const queryClient = new QueryClient({
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.PROD ? '/creche-site' : ''}>
       <QueryClientProvider client={queryClient}>
         <LanguageProvider>
           <AuthProvider>

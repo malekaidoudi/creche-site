@@ -2,6 +2,7 @@
   "name": "creche-frontend",
   "version": "1.0.0",
   "type": "module",
+  "homepage": "https://malekaidoudi.github.io/creche-site",
   "description": "Frontend React pour le système de gestion de crèche",
   "scripts": {
     "dev": "vite",
