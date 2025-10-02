@@ -69,11 +69,11 @@ const DemoAccountsInfo = () => {
       </div>
 
       {/* Accounts Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-6 max-w-6xl mx-auto">
+      <div className="flex flex-col gap-6 mb-6 max-w-2xl mx-auto">
         {accounts.map(({ type, data, bgColor, borderColor, textColor, icon, description }) => (
           <div
             key={type}
-            className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden border border-gray-100 w-full max-w-sm mx-auto"
+            className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden border border-gray-100 w-full"
           >
             {/* Card Header */}
             <div className={`${bgColor} px-6 py-4 border-b border-gray-100`}>
@@ -141,14 +141,36 @@ const DemoAccountsInfo = () => {
               {/* Quick Login Button */}
               <button
                 onClick={() => {
-                  // Auto-fill login form (if available)
-                  const emailInput = document.querySelector('input[type="email"]')
-                  const passwordInput = document.querySelector('input[type="password"]')
+                  // Copier les identifiants dans le presse-papiers et notifier l'utilisateur
+                  copyToClipboard(`${data.email}`, `${type}-quick-email`)
+                  copyToClipboard(`${data.password}`, `${type}-quick-password`)
+                  
+                  // Essayer de remplir automatiquement si possible
+                  const emailInput = document.querySelector('input[id="email"]')
+                  const passwordInput = document.querySelector('input[id="password"]')
+                  
                   if (emailInput && passwordInput) {
+                    // Méthode plus compatible avec React Hook Form
                     emailInput.value = data.email
                     passwordInput.value = data.password
+                    
+                    // Déclencher les événements natifs
                     emailInput.dispatchEvent(new Event('input', { bubbles: true }))
+                    emailInput.dispatchEvent(new Event('change', { bubbles: true }))
                     passwordInput.dispatchEvent(new Event('input', { bubbles: true }))
+                    passwordInput.dispatchEvent(new Event('change', { bubbles: true }))
+                    
+                    // Notification de succès
+                    setTimeout(() => {
+                      if (window.toast) {
+                        window.toast.success('Champs remplis automatiquement !')
+                      }
+                    }, 100)
+                  } else {
+                    // Si le remplissage automatique ne fonctionne pas, au moins copier
+                    if (window.toast) {
+                      window.toast.success('Identifiants copiés ! Collez-les dans le formulaire.')
+                    }
                   }
                 }}
                 className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
@@ -159,7 +181,7 @@ const DemoAccountsInfo = () => {
                     : 'bg-green-600 hover:bg-green-700 text-white'
                 }`}
               >
-                Remplir automatiquement
+                Utiliser ce compte
               </button>
             </div>
           </div>
