@@ -3,7 +3,7 @@ const multer = require('multer')
 const path = require('path')
 const fs = require('fs').promises
 const { authenticateToken } = require('../middleware/auth')
-const db = require('../config/database')
+const { query: dbQuery } = require('../config/database')
 
 const router = express.Router()
 
@@ -57,13 +57,13 @@ router.post('/profile-picture', authenticateToken, upload.single('profile_pictur
     const profilePictureUrl = `/uploads/profiles/${filename}`
 
     // Récupérer l'ancienne photo de profil pour la supprimer
-    const [currentUser] = await db.execute(
+    const currentUser = await dbQuery(
       'SELECT profile_picture FROM users WHERE id = ?',
       [userId]
     )
 
     // Mettre à jour la base de données avec la nouvelle URL
-    await db.execute(
+    await dbQuery(
       'UPDATE users SET profile_picture = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
       [profilePictureUrl, userId]
     )
@@ -109,7 +109,7 @@ router.delete('/profile-picture', authenticateToken, async (req, res) => {
     const userId = req.user.id
 
     // Récupérer la photo actuelle
-    const [currentUser] = await db.execute(
+    const currentUser = await dbQuery(
       'SELECT profile_picture FROM users WHERE id = ?',
       [userId]
     )
@@ -127,7 +127,7 @@ router.delete('/profile-picture', authenticateToken, async (req, res) => {
     }
 
     // Mettre à jour la base de données
-    await db.execute(
+    await dbQuery(
       'UPDATE users SET profile_picture = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
       [userId]
     )

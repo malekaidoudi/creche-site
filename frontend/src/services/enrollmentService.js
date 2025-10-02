@@ -8,7 +8,12 @@ export const enrollmentService = {
 
   // Obtenir toutes les inscriptions (alias pour compatibilité)
   getAllEnrollments: async (params = {}) => {
-    return await getPaginatedData('/enrollments', params)
+    const defaultParams = {
+      page: 1,
+      limit: 50,
+      ...params
+    }
+    return await getPaginatedData('/enrollments', defaultParams)
   },
 
   // Obtenir une inscription par ID

@@ -34,8 +34,10 @@ const PublicHeader = () => {
     conditionalNavigation.push({ name: t('nav.enrollment'), href: '/inscription' })
   }
   
-  // Contact toujours disponible
-  conditionalNavigation.push({ name: t('nav.contact'), href: '/contact' })
+  // Contact uniquement pour les non-connectés ou les parents
+  if (!isAuthenticated || user?.role === 'parent') {
+    conditionalNavigation.push({ name: t('nav.contact'), href: '/contact' })
+  }
 
   // Si l'utilisateur est connecté, ajouter le lien approprié selon le rôle
   if (isAuthenticated) {

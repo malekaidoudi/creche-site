@@ -169,14 +169,6 @@ function App() {
           } 
         />
         <Route 
-          path="contacts" 
-          element={
-            <ProtectedRoute roles={['admin', 'staff']}>
-              <ContactsPage />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
           path="reports" 
           element={
             <ProtectedRoute roles={['admin']}>

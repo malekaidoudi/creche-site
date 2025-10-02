@@ -63,12 +63,6 @@ const DashboardSidebar = () => {
         roles: ['admin', 'staff']
       },
       {
-        name: t('nav.contacts'),
-        href: '/dashboard/contacts',
-        icon: MessageSquare,
-        roles: ['admin', 'staff']
-      },
-      {
         name: 'Médias',
         href: '/dashboard/media',
         icon: Image,

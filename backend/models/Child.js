@@ -65,7 +65,20 @@ class Child {
 
   // Obtenir tous les enfants avec pagination
   static async findAll(page = 1, limit = 10, search = null) {
-    const offset = (page - 1) * limit;
+    // S'assurer que page et limit sont des entiers valides
+    let pageNum = 1;
+    let limitNum = 10;
+    
+    if (page !== null && page !== undefined && !isNaN(page)) {
+      pageNum = Math.max(1, parseInt(page));
+    }
+    
+    if (limit !== null && limit !== undefined && !isNaN(limit)) {
+      limitNum = Math.max(1, Math.min(100, parseInt(limit)));
+    }
+    
+    const offset = (pageNum - 1) * limitNum;
+    
     let sql = 'SELECT * FROM children WHERE is_active = TRUE';
     let params = [];
 
@@ -74,8 +87,8 @@ class Child {
       params.push(`%${search}%`, `%${search}%`);
     }
 
-    sql += ' ORDER BY first_name, last_name LIMIT ? OFFSET ?';
-    params.push(limit, offset);
+    sql += ` ORDER BY first_name, last_name LIMIT ${limitNum} OFFSET ${offset}`;
+    // Ne pas ajouter limit et offset aux params car MySQL ne les accepte pas comme paramètres
 
     const results = await query(sql, params);
     
@@ -94,27 +107,39 @@ class Child {
     return {
       children: results.map(child => new Child(child)),
       pagination: {
-        page,
-        limit,
+        page: pageNum,
+        limit: limitNum,
         total,
-        pages: Math.ceil(total / limit)
+        pages: Math.ceil(total / limitNum)
       }
     };
   }
 
   // Obtenir les enfants d'un parent
   static async findByParent(parentId, page = 1, limit = 10) {
-    const offset = (page - 1) * limit;
+    // S'assurer que page et limit sont des entiers valides
+    let pageNum = 1;
+    let limitNum = 10;
+    
+    if (page !== null && page !== undefined && !isNaN(page)) {
+      pageNum = Math.max(1, parseInt(page));
+    }
+    
+    if (limit !== null && limit !== undefined && !isNaN(limit)) {
+      limitNum = Math.max(1, Math.min(100, parseInt(limit)));
+    }
+    
+    const offset = (pageNum - 1) * limitNum;
     
     const sql = `
       SELECT c.* FROM children c
       INNER JOIN enrollments e ON c.id = e.child_id
       WHERE e.parent_id = ? AND c.is_active = TRUE AND e.status = 'approved'
       ORDER BY c.first_name, c.last_name
-      LIMIT ? OFFSET ?
+      LIMIT ${limitNum} OFFSET ${offset}
     `;
     
-    const results = await query(sql, [parentId, limit, offset]);
+    const results = await query(sql, [parentId]);
     
     // Compter le total
     const countSql = `
@@ -129,10 +154,10 @@ class Child {
     return {
       children: results.map(child => new Child(child)),
       pagination: {
-        page,
-        limit,
+        page: pageNum,
+        limit: limitNum,
         total,
-        pages: Math.ceil(total / limit)
+        pages: Math.ceil(total / limitNum)
       }
     };
   }

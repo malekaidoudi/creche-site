@@ -21,8 +21,18 @@ router.get('/', [
       });
     }
 
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    // Valeurs par défaut robustes pour la pagination
+    let page = 1;
+    let limit = 10;
+    
+    if (req.query.page && !isNaN(req.query.page)) {
+      page = Math.max(1, parseInt(req.query.page));
+    }
+    
+    if (req.query.limit && !isNaN(req.query.limit)) {
+      limit = Math.max(1, Math.min(100, parseInt(req.query.limit)));
+    }
+    
     const status = req.query.status;
     const offset = (page - 1) * limit;
 
@@ -48,8 +58,8 @@ router.get('/', [
       params.push(status);
     }
 
-    sql += ' ORDER BY e.created_at DESC LIMIT ? OFFSET ?';
-    params.push(limit, offset);
+    sql += ` ORDER BY e.created_at DESC LIMIT ${limit} OFFSET ${offset}`;
+    // Ne pas ajouter limit et offset aux params
 
     const enrollments = await dbQuery(sql, params);
     

@@ -24,11 +24,11 @@ const SettingsPage = () => {
   
   const [settings, setSettings] = useState({
     general: {
-      nurseryName: 'Ma Petite Crèche',
-      address: '123 Rue de la Paix, Casablanca',
-      phone: '+212 5 22 00 00 00',
-      email: 'contact@mapetitecreche.ma',
-      website: 'www.mapetitecreche.ma',
+      nurseryName: 'Mima Elghalia',
+      address: 'Avenue Habib Bourguiba, Tunis',
+      phone: '+216 71 000 000',
+      email: 'contact@mimaelghalia.tn',
+      website: 'www.mimaelghalia.tn',
       capacity: 50,
       openingTime: '07:00',
       closingTime: '18:00'
@@ -47,9 +47,9 @@ const SettingsPage = () => {
       loginAttempts: 5
     },
     billing: {
-      currency: 'MAD',
-      taxRate: 20,
-      lateFee: 50,
+      currency: 'TND',
+      taxRate: 19,
+      lateFee: 20,
       discountRate: 10,
       paymentMethods: ['cash', 'card', 'transfer']
     }
@@ -288,7 +288,7 @@ const SettingsPage = () => {
             value={settings.billing.currency}
             onChange={(e) => updateSetting('billing', 'currency', e.target.value)}
           >
-            <option value="MAD">Dirham (MAD)</option>
+            <option value="TND">Dinar Tunisien (TND)</option>
             <option value="EUR">Euro (EUR)</option>
             <option value="USD">Dollar (USD)</option>
           </select>

@@ -22,8 +22,18 @@ router.get('/', [
       });
     }
 
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    // Valeurs par défaut robustes pour la pagination
+    let page = 1;
+    let limit = 10;
+    
+    if (req.query.page && !isNaN(req.query.page)) {
+      page = Math.max(1, parseInt(req.query.page));
+    }
+    
+    if (req.query.limit && !isNaN(req.query.limit)) {
+      limit = Math.max(1, Math.min(100, parseInt(req.query.limit)));
+    }
+    
     const role = req.query.role;
 
     const result = await User.findAll(page, limit, role);

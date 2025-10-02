@@ -65,7 +65,20 @@ class User {
 
   // Obtenir tous les utilisateurs avec pagination
   static async findAll(page = 1, limit = 10, role = null) {
-    const offset = (page - 1) * limit;
+    // S'assurer que page et limit sont des entiers valides
+    let pageNum = 1;
+    let limitNum = 10;
+    
+    if (page !== null && page !== undefined && !isNaN(page)) {
+      pageNum = Math.max(1, parseInt(page));
+    }
+    
+    if (limit !== null && limit !== undefined && !isNaN(limit)) {
+      limitNum = Math.max(1, Math.min(100, parseInt(limit)));
+    }
+    
+    const offset = (pageNum - 1) * limitNum;
+    
     let sql = 'SELECT * FROM users WHERE is_active = TRUE';
     let params = [];
 
@@ -74,8 +87,8 @@ class User {
       params.push(role);
     }
 
-    sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
-    params.push(limit, offset);
+    sql += ` ORDER BY created_at DESC LIMIT ${limitNum} OFFSET ${offset}`;
+    // Ne pas ajouter limit et offset aux params car MySQL ne les accepte pas comme paramètres
 
     const results = await query(sql, params);
     
@@ -94,10 +107,10 @@ class User {
     return {
       users: results.map(user => new User(user)),
       pagination: {
-        page,
-        limit,
+        page: pageNum,
+        limit: limitNum,
         total,
-        pages: Math.ceil(total / limit)
+        pages: Math.ceil(total / limitNum)
       }
     };
   }

@@ -8,7 +8,12 @@ export const childrenService = {
 
   // Obtenir tous les enfants (alias pour compatibilité)
   getAllChildren: async (params = {}) => {
-    return await getPaginatedData('/children', params)
+    const defaultParams = {
+      page: 1,
+      limit: 50,
+      ...params
+    }
+    return await getPaginatedData('/children', defaultParams)
   },
 
   // Obtenir un enfant par ID

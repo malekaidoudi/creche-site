@@ -191,8 +191,8 @@ router.get('/', authenticateToken, async (req, res) => {
       params.push(req.user.id);
     }
 
-    sql += ' ORDER BY u.created_at DESC LIMIT ? OFFSET ?';
-    params.push(limit, offset);
+    sql += ` ORDER BY u.created_at DESC LIMIT ${limit} OFFSET ${offset}`;
+    // Ne pas ajouter limit et offset aux params
 
     const uploads = await dbQuery(sql, params);
     

@@ -14,8 +14,12 @@ export const attendanceService = {
 
   // Obtenir les présences par date
   getAttendanceByDate: async (date) => {
-    const response = await apiRequest.get(`/attendance/date/${date}`)
-    return response.data
+    const defaultParams = {
+      page: 1,
+      limit: 100
+    }
+    const response = await getPaginatedData(`/attendance/date/${date}`, defaultParams)
+    return response
   },
 
   // Obtenir les présences d'un enfant

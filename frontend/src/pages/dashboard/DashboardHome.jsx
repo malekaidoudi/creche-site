@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { Users, Baby, Calendar, UserPlus, TrendingUp, Clock } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useLanguage } from '../../hooks/useLanguage'
@@ -9,6 +10,7 @@ const DashboardHome = () => {
   const { t } = useTranslation()
   const { user } = useAuth()
   const { isRTL } = useLanguage()
+  const navigate = useNavigate()
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalChildren: 0,
@@ -211,7 +213,10 @@ const DashboardHome = () => {
         <div className="card-body">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {user?.role === 'admin' && (
-              <button className="btn-outline-primary text-left rtl:text-right">
+              <button 
+                onClick={() => navigate('/dashboard/users')}
+                className="btn-outline-primary text-left rtl:text-right hover:scale-105 transition-transform"
+              >
                 <Users className="w-5 h-5 mb-2" />
                 <div>
                   <div className="font-medium">
@@ -226,7 +231,10 @@ const DashboardHome = () => {
             
             {['admin', 'staff'].includes(user?.role) && (
               <>
-                <button className="btn-outline-primary text-left rtl:text-right">
+                <button 
+                  onClick={() => navigate('/dashboard/children')}
+                  className="btn-outline-primary text-left rtl:text-right hover:scale-105 transition-transform"
+                >
                   <Baby className="w-5 h-5 mb-2" />
                   <div>
                     <div className="font-medium">
@@ -238,7 +246,10 @@ const DashboardHome = () => {
                   </div>
                 </button>
                 
-                <button className="btn-outline-primary text-left rtl:text-right">
+                <button 
+                  onClick={() => navigate('/dashboard/attendance')}
+                  className="btn-outline-primary text-left rtl:text-right hover:scale-105 transition-transform"
+                >
                   <Calendar className="w-5 h-5 mb-2" />
                   <div>
                     <div className="font-medium">
@@ -252,7 +263,10 @@ const DashboardHome = () => {
               </>
             )}
             
-            <button className="btn-outline-primary text-left rtl:text-right">
+            <button 
+              onClick={() => navigate('/dashboard/enrollments')}
+              className="btn-outline-primary text-left rtl:text-right hover:scale-105 transition-transform"
+            >
               <UserPlus className="w-5 h-5 mb-2" />
               <div>
                 <div className="font-medium">

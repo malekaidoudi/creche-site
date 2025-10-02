@@ -43,7 +43,10 @@ const ProfilePage = () => {
   const onSubmitProfile = async (data) => {
     try {
       setLoading(true)
-      await updateProfile(data)
+      // Ne pas inclure profile_picture dans les données à sauvegarder
+      // car elle est gérée séparément par handleProfilePictureChange
+      const { profile_picture, ...profileData } = data
+      await updateProfile(profileData)
     } catch (error) {
       console.error('Erreur lors de la mise à jour du profil:', error)
     } finally {
@@ -56,6 +59,7 @@ const ProfilePage = () => {
       // Supprimer la photo de profil
       try {
         await uploadService.deleteProfilePicture()
+        // Mettre à jour immédiatement le profil utilisateur
         await updateProfile({ profile_picture: null })
         return
       } catch (error) {
@@ -68,7 +72,7 @@ const ProfilePage = () => {
       // Upload de la nouvelle photo
       const result = await uploadService.uploadProfilePicture(file)
       
-      // Mettre à jour le profil avec la nouvelle URL
+      // Mettre à jour immédiatement le profil utilisateur
       await updateProfile({ profile_picture: result.profile_picture_url })
       
       return result

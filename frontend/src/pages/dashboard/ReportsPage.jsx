@@ -13,6 +13,7 @@ import { useLanguage } from '../../hooks/useLanguage'
 import PageHeader from '../../components/ui/PageHeader'
 import StatsCard from '../../components/ui/StatsCard'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
+import { formatSimpleTND } from '../../utils/currency'
 
 const ReportsPage = () => {
   const { t } = useTranslation()
@@ -144,7 +145,7 @@ const ReportsPage = () => {
         />
         <StatsCard
           title={isRTL ? 'الإيرادات' : 'Revenus'}
-          value={`${stats.revenue.toLocaleString()} DH`}
+          value={formatSimpleTND(stats.revenue)}
           icon={BarChart3}
           color="yellow"
           trend={{ value: 12, isPositive: true }}
@@ -223,7 +224,7 @@ const ReportsPage = () => {
                   <tr key={index}>
                     <td className="table-cell font-medium">{item.month}</td>
                     <td className="table-cell">{item.enrollments}</td>
-                    <td className="table-cell">{item.revenue.toLocaleString()} DH</td>
+                    <td className="table-cell">{formatSimpleTND(item.revenue)}</td>
                     <td className="table-cell">
                       <span className="badge-success">
                         {Math.floor(Math.random() * 10) + 85}%

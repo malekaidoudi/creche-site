@@ -8,7 +8,12 @@ export const userService = {
 
   // Obtenir tous les utilisateurs (alias pour compatibilité)
   getAllUsers: async (params = {}) => {
-    return await getPaginatedData('/users', params)
+    const defaultParams = {
+      page: 1,
+      limit: 50,
+      ...params
+    }
+    return await getPaginatedData('/users', defaultParams)
   },
 
   // Obtenir un utilisateur par ID

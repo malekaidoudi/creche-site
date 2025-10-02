@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Camera, Upload, X, User } from 'lucide-react'
 import { useLanguage } from '../../hooks/useLanguage'
 import LoadingSpinner from './LoadingSpinner'
 import toast from 'react-hot-toast'
+import { uploadService } from '../../services/uploadService'
 
 const ProfilePictureUpload = ({ 
   currentImage, 
@@ -12,8 +13,15 @@ const ProfilePictureUpload = ({
 }) => {
   const { isRTL } = useLanguage()
   const [isUploading, setIsUploading] = useState(false)
-  const [previewImage, setPreviewImage] = useState(currentImage)
+  const [previewImage, setPreviewImage] = useState(
+    currentImage ? uploadService.getFileUrl(currentImage) : null
+  )
   const fileInputRef = useRef(null)
+
+  // Mettre à jour l'image de prévisualisation quand currentImage change
+  useEffect(() => {
+    setPreviewImage(currentImage ? uploadService.getFileUrl(currentImage) : null)
+  }, [currentImage])
 
   const sizeClasses = {
     sm: 'w-16 h-16',
@@ -54,7 +62,7 @@ const ProfilePictureUpload = ({
         .catch((error) => {
           console.error('Erreur upload:', error)
           toast.error(isRTL ? 'خطأ في تحميل الصورة' : 'Erreur lors du téléchargement')
-          setPreviewImage(currentImage) // Revenir à l'image précédente
+          setPreviewImage(currentImage ? uploadService.getFileUrl(currentImage) : null) // Revenir à l'image précédente
         })
         .finally(() => {
           setIsUploading(false)

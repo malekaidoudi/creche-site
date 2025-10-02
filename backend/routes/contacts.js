@@ -40,8 +40,8 @@ router.get('/', [
       params.push(status);
     }
 
-    sql += ' ORDER BY c.created_at DESC LIMIT ? OFFSET ?';
-    params.push(limit, offset);
+    sql += ` ORDER BY c.created_at DESC LIMIT ${limit} OFFSET ${offset}`;
+    // Ne pas ajouter limit et offset aux params
 
     const contacts = await dbQuery(sql, params);
     

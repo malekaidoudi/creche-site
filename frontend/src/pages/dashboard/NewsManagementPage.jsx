@@ -14,6 +14,12 @@ const NewsManagementPage = () => {
   const [priorityFilter, setPriorityFilter] = useState('all')
   const [showModal, setShowModal] = useState(false)
   const [selectedNews, setSelectedNews] = useState(null)
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    priority: 'medium',
+    status: 'draft'
+  })
 
   // Données simulées pour la démonstration
   const mockNews = [
@@ -80,6 +86,61 @@ const NewsManagementPage = () => {
     } catch (error) {
       console.error('Erreur lors de la suppression:', error)
       toast.error('Erreur lors de la suppression')
+    }
+  }
+
+  const handleOpenModal = (newsItem = null) => {
+    if (newsItem) {
+      setSelectedNews(newsItem)
+      setFormData({
+        title: newsItem.title,
+        content: newsItem.content,
+        priority: newsItem.priority,
+        status: newsItem.status
+      })
+    } else {
+      setSelectedNews(null)
+      setFormData({
+        title: '',
+        content: '',
+        priority: 'medium',
+        status: 'draft'
+      })
+    }
+    setShowModal(true)
+  }
+
+  const handleSaveNews = async () => {
+    if (!formData.title.trim() || !formData.content.trim()) {
+      toast.error(isRTL ? 'يرجى ملء جميع الحقول المطلوبة' : 'Veuillez remplir tous les champs requis')
+      return
+    }
+
+    try {
+      if (selectedNews) {
+        // Modification
+        setNews(news.map(item => 
+          item.id === selectedNews.id 
+            ? { ...item, ...formData, updated_at: new Date().toISOString() }
+            : item
+        ))
+        toast.success(isRTL ? 'تم تحديث الخبر بنجاح' : 'Actualité mise à jour avec succès')
+      } else {
+        // Création
+        const newNewsItem = {
+          id: Date.now(),
+          ...formData,
+          author: 'Admin',
+          created_at: new Date().toISOString(),
+          views: 0
+        }
+        setNews([newNewsItem, ...news])
+        toast.success(isRTL ? 'تم إنشاء الخبر بنجاح' : 'Actualité créée avec succès')
+      }
+      setShowModal(false)
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error)
+      toast.error('Erreur lors de la sauvegarde')
     }
   }
 
@@ -159,7 +220,7 @@ const NewsManagementPage = () => {
           </p>
         </div>
         <button 
-          onClick={() => setShowModal(true)}
+          onClick={() => handleOpenModal()}
           className="btn-primary mt-4 sm:mt-0"
         >
           <Plus className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
@@ -275,7 +336,7 @@ const NewsManagementPage = () => {
                       <td className="px-6 py-4 text-sm font-medium">
                         <div className="flex items-center space-x-2 rtl:space-x-reverse">
                           <button
-                            onClick={() => setSelectedNews(item)}
+                            onClick={() => handleOpenModal(item)}
                             className="text-blue-600 hover:text-blue-900"
                           >
                             <Edit className="w-4 h-4" />
@@ -296,6 +357,105 @@ const NewsManagementPage = () => {
           )}
         </div>
       </div>
+
+      {/* Modal de création/édition d'actualité */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {selectedNews 
+                  ? (isRTL ? 'تعديل الخبر' : 'Modifier l\'actualité')
+                  : (isRTL ? 'إضافة خبر جديد' : 'Nouvelle actualité')
+                }
+              </h3>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {isRTL ? 'العنوان' : 'Titre'} *
+                </label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => setFormData({...formData, title: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder={isRTL ? 'أدخل عنوان الخبر' : 'Entrez le titre de l\'actualité'}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {isRTL ? 'المحتوى' : 'Contenu'} *
+                </label>
+                <textarea
+                  value={formData.content}
+                  onChange={(e) => setFormData({...formData, content: e.target.value})}
+                  rows={6}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder={isRTL ? 'أدخل محتوى الخبر' : 'Entrez le contenu de l\'actualité'}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {isRTL ? 'الأولوية' : 'Priorité'}
+                  </label>
+                  <select
+                    value={formData.priority}
+                    onChange={(e) => setFormData({...formData, priority: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="low">{isRTL ? 'منخفضة' : 'Basse'}</option>
+                    <option value="medium">{isRTL ? 'متوسطة' : 'Moyenne'}</option>
+                    <option value="high">{isRTL ? 'عالية' : 'Haute'}</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {isRTL ? 'الحالة' : 'Statut'}
+                  </label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({...formData, status: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="draft">{isRTL ? 'مسودة' : 'Brouillon'}</option>
+                    <option value="published">{isRTL ? 'منشور' : 'Publié'}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex space-x-3 rtl:space-x-reverse mt-6 pt-6 border-t">
+              <button
+                onClick={() => setShowModal(false)}
+                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                {isRTL ? 'إلغاء' : 'Annuler'}
+              </button>
+              <button
+                onClick={handleSaveNews}
+                className="flex-1 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                {selectedNews 
+                  ? (isRTL ? 'تحديث' : 'Mettre à jour')
+                  : (isRTL ? 'إنشاء' : 'Créer')
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
