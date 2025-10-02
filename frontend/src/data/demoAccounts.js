@@ -104,12 +104,20 @@ export const demoToken = 'demo-jwt-token-for-github-pages'
 
 // Fonction pour simuler l'authentification
 export const authenticateDemo = (email, password) => {
+  console.log('🔐 Tentative d\'authentification démo:')
+  console.log('- Email reçu:', email)
+  console.log('- Password reçu:', password)
+  console.log('- Comptes disponibles:', Object.values(demoAccounts).map(acc => ({ email: acc.email, password: acc.password })))
+  
   const account = Object.values(demoAccounts).find(
     acc => acc.email === email && acc.password === password
   )
   
+  console.log('- Compte trouvé:', account ? 'OUI' : 'NON')
+  
   if (account) {
     const { password: _, ...userWithoutPassword } = account
+    console.log('✅ Authentification réussie pour:', userWithoutPassword.email)
     return {
       success: true,
       data: {
@@ -119,6 +127,7 @@ export const authenticateDemo = (email, password) => {
     }
   }
   
+  console.log('❌ Authentification échouée')
   return {
     success: false,
     error: 'Email ou mot de passe incorrect'

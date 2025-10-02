@@ -1,12 +1,13 @@
 import { apiRequest } from './api'
 import { authenticateDemo, demoAccounts } from '../data/demoAccounts'
+import { forceDemo, debugAuth } from '../utils/debugAuth'
 
 export const authService = {
   // Connexion
   login: async (credentials) => {
-    // En mode production (GitHub Pages), utiliser les comptes de démo
-    const apiUrl = import.meta.env.VITE_API_URL
-    const isDemo = import.meta.env.PROD && (!apiUrl || apiUrl.includes('votre-backend-url'))
+    // Détection du mode démo avec debug
+    debugAuth()
+    const isDemo = forceDemo()
     
     if (isDemo) {
       console.log('🎭 Mode démo activé - Utilisation des comptes de démonstration')
@@ -33,8 +34,7 @@ export const authService = {
   // Obtenir l'utilisateur actuel
   getCurrentUser: async () => {
     // En mode démo, retourner l'utilisateur depuis le localStorage
-    const apiUrl = import.meta.env.VITE_API_URL
-    const isDemo = import.meta.env.PROD && (!apiUrl || apiUrl.includes('votre-backend-url'))
+    const isDemo = forceDemo()
     
     if (isDemo) {
       const token = localStorage.getItem('token')

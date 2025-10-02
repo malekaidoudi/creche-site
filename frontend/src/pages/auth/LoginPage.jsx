@@ -8,6 +8,7 @@ import { useLanguage } from '../../hooks/useLanguage'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
 import DemoAccountsInfo from '../../components/demo/DemoAccountsInfo'
 import LanguageToggle from '../../components/ui/LanguageToggle'
+import { testDemoAccounts } from '../../utils/testAuth'
 
 const LoginPage = () => {
   const { t } = useTranslation()
@@ -17,6 +18,13 @@ const LoginPage = () => {
   const location = useLocation()
   const [showPassword, setShowPassword] = useState(false)
   const from = location.state?.from?.pathname || '/dashboard'
+
+  // Test des comptes de démo au chargement
+  useEffect(() => {
+    if (import.meta.env.PROD) {
+      testDemoAccounts()
+    }
+  }, [])
 
   const {
     register,
