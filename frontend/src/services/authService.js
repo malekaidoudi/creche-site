@@ -5,7 +5,11 @@ export const authService = {
   // Connexion
   login: async (credentials) => {
     // En mode production (GitHub Pages), utiliser les comptes de démo
-    if (import.meta.env.PROD && !import.meta.env.VITE_API_URL) {
+    const apiUrl = import.meta.env.VITE_API_URL
+    const isDemo = import.meta.env.PROD && (!apiUrl || apiUrl.includes('votre-backend-url'))
+    
+    if (isDemo) {
+      console.log('🎭 Mode démo activé - Utilisation des comptes de démonstration')
       return new Promise((resolve, reject) => {
         setTimeout(() => {
           const result = authenticateDemo(credentials.email, credentials.password)
@@ -29,7 +33,10 @@ export const authService = {
   // Obtenir l'utilisateur actuel
   getCurrentUser: async () => {
     // En mode démo, retourner l'utilisateur depuis le localStorage
-    if (import.meta.env.PROD && !import.meta.env.VITE_API_URL) {
+    const apiUrl = import.meta.env.VITE_API_URL
+    const isDemo = import.meta.env.PROD && (!apiUrl || apiUrl.includes('votre-backend-url'))
+    
+    if (isDemo) {
       const token = localStorage.getItem('token')
       if (token === 'demo-jwt-token-for-github-pages') {
         const userStr = localStorage.getItem('demoUser')

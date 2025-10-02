@@ -136,7 +136,10 @@ export function AuthProvider({ children }) {
       let errorMessage = 'Erreur de connexion'
       
       // En mode démo, afficher le message d'erreur spécifique
-      if (import.meta.env.PROD && !import.meta.env.VITE_API_URL) {
+      const apiUrl = import.meta.env.VITE_API_URL
+      const isDemo = import.meta.env.PROD && (!apiUrl || apiUrl.includes('votre-backend-url'))
+      
+      if (isDemo) {
         errorMessage = error.message || 'Email ou mot de passe incorrect'
       } else {
         errorMessage = error.response?.data?.error || 'Erreur de connexion, vérifiez votre connexion internet'
