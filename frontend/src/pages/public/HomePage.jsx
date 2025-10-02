@@ -222,7 +222,7 @@ const HomePage = () => {
                     />
                     */}
                     <img
-                      src="/images/affiche.jpg"
+                      src={`${import.meta.env.BASE_URL}images/affiche.jpg`}
                       alt="Enfants heureux à la crèche"
                       className="w-full h-full object-cover"
                     />

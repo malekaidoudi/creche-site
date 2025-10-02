@@ -69,14 +69,14 @@ const ParentDashboard = () => {
       title: isRTL ? 'بول رسم تنيناً' : 'Paul a dessiné un dragon',
       description: isRTL ? 'نشاط فني إبداعي' : 'Activité artistique créative',
       time: '2h',
-      photos: ['/images/drawing1.jpg', '/images/drawing2.jpg']
+      photos: [`${import.meta.env.BASE_URL}images/drawing1.jpg`, `${import.meta.env.BASE_URL}images/drawing2.jpg`]
     },
     {
       id: 2,
       title: isRTL ? 'لعب في الحديقة' : 'Jeu dans le jardin',
       description: isRTL ? 'وقت اللعب في الهواء الطلق' : 'Temps de jeu en extérieur',
       time: '4h',
-      photos: ['/images/garden1.jpg']
+      photos: [`${import.meta.env.BASE_URL}images/garden1.jpg`]
     }
   ]
 

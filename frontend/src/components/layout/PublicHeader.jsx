@@ -77,7 +77,7 @@ const PublicHeader = () => {
             <Link to="/" className="flex items-center">
               <div className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center">
                 <img
-                  src="/images/logo_creche.jpg"
+                  src={`${import.meta.env.BASE_URL}images/logo_creche.jpg`}
                   alt="Mima Elghalia"
                   className="w-full h-full object-contain"
                   onError={(e) => {
