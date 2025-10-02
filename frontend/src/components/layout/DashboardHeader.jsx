@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Bell, User, LogOut, Settings, Menu, Home } from 'lucide-react'
+import { Bell, Search, User, LogOut, Settings, Menu } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useLanguage } from '../../hooks/useLanguage'
 import LanguageToggle from '../ui/LanguageToggle'
-import NotificationCenter from '../ui/NotificationCenter'
+import UserMenu from '../ui/UserMenu'
+import { ImageWithFallback, defaultImages } from '../../utils/imageUtils'
 
 const DashboardHeader = () => {
   const { t } = useTranslation()
@@ -26,19 +27,12 @@ const DashboardHeader = () => {
           <div className="flex items-center">
             <Link to="/dashboard" className="flex items-center">
               <div className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center">
-                <img
-                  src={`${import.meta.env.BASE_URL}images/logo_creche.jpg`}
+                <ImageWithFallback
+                  src="images/logo_creche.jpg"
                   alt="Mima Elghalia"
+                  fallback={defaultImages.logo}
                   className="w-full h-full object-contain"
-                  onError={(e) => {
-                    // Fallback si l'image n'existe pas
-                    e.target.style.display = 'none'
-                    e.target.nextSibling.style.display = 'flex'
-                  }}
                 />
-                <div className="w-10 h-10 bg-primary-600 rounded-lg items-center justify-center hidden">
-                  <span className="text-white font-bold text-lg">M</span>
-                </div>
               </div>
               <div className="ml-3 rtl:ml-0 rtl:mr-3">
                 <div className="text-lg font-bold text-gray-900">

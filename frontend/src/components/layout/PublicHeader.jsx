@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Menu, X, Globe, User, LogOut } from 'lucide-react'
+import { Menu, X, ChevronDown, Globe } from 'lucide-react'
 import { useLanguage } from '../../hooks/useLanguage'
-import { useAuth } from '../../hooks/useAuth'
 import LanguageToggle from '../ui/LanguageToggle'
+import { ImageWithFallback, defaultImages } from '../../utils/imageUtils'
+import { useAuth } from '../../hooks/useAuth'
 
 const PublicHeader = () => {
   const { t } = useTranslation()
@@ -76,19 +77,12 @@ const PublicHeader = () => {
           <div className="flex-shrink-0">
             <Link to="/" className="flex items-center">
               <div className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center">
-                <img
-                  src={`${import.meta.env.BASE_URL}images/logo_creche.jpg`}
+                <ImageWithFallback
+                  src="images/logo_creche.jpg"
                   alt="Mima Elghalia"
+                  fallback={defaultImages.logo}
                   className="w-full h-full object-contain"
-                  onError={(e) => {
-                    // Fallback si l'image n'existe pas
-                    e.target.style.display = 'none'
-                    e.target.nextSibling.style.display = 'flex'
-                  }}
                 />
-                <div className="w-10 h-10 bg-primary-600 rounded-lg items-center justify-center hidden">
-                  <span className="text-white font-bold text-lg">M</span>
-                </div>
               </div>
               <div className="ml-3 rtl:ml-0 rtl:mr-3">
                 <div className="text-lg font-bold text-gray-900">

@@ -47,94 +47,137 @@ const DemoAccountsInfo = () => {
   ]
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            🎭 Comptes de Démonstration
-          </h3>
-          <p className="text-sm text-gray-600 mt-1">
-            Utilisez ces comptes pour tester les différents rôles
-          </p>
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl shadow-lg border border-blue-200 p-6 mb-8">
+      {/* Header */}
+      <div className="text-center mb-6">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
+          <span className="text-2xl">🎭</span>
         </div>
+        <h3 className="text-xl font-bold text-gray-900 mb-2">
+          Comptes de Démonstration
+        </h3>
+        <p className="text-gray-600 mb-4">
+          Testez les différents rôles avec ces comptes prêts à l'emploi
+        </p>
         <button
           onClick={() => setShowPasswords(!showPasswords)}
-          className="flex items-center gap-2 px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200"
         >
           {showPasswords ? <EyeOff size={16} /> : <Eye size={16} />}
           {showPasswords ? 'Masquer' : 'Afficher'} les mots de passe
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Accounts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {accounts.map(({ type, data, bgColor, borderColor, textColor, icon, description }) => (
           <div
             key={type}
-            className={`${bgColor} ${borderColor} border rounded-lg p-4`}
+            className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden border border-gray-100"
           >
-            <div className="flex items-center gap-3 mb-3">
-              <span className="text-2xl">{icon}</span>
-              <div>
-                <h4 className={`font-semibold ${textColor} capitalize`}>
-                  {type}
-                </h4>
-                <p className="text-xs text-gray-600">{description}</p>
+            {/* Card Header */}
+            <div className={`${bgColor} px-6 py-4 border-b border-gray-100`}>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                  <span className="text-2xl">{icon}</span>
+                </div>
+                <div>
+                  <h4 className={`font-bold text-lg ${textColor} capitalize`}>
+                    {type === 'admin' ? 'Administrateur' : type === 'staff' ? 'Personnel' : 'Parent'}
+                  </h4>
+                  <p className="text-sm text-gray-600">{description}</p>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700">Email:</span>
-                <div className="flex items-center gap-1">
-                  <code className="text-xs bg-white px-2 py-1 rounded">
+            {/* Card Body */}
+            <div className="p-6 space-y-4">
+              {/* Email */}
+              <div>
+                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+                  Email
+                </label>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 text-sm bg-gray-50 px-3 py-2 rounded-lg border font-mono">
                     {data.email}
                   </code>
                   <button
                     onClick={() => copyToClipboard(data.email, `${type}-email`)}
-                    className="p-1 hover:bg-white rounded transition-colors"
+                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                     title="Copier l'email"
                   >
                     {copiedAccount === `${type}-email` ? (
-                      <Check size={12} className="text-green-600" />
+                      <Check size={16} className="text-green-600" />
                     ) : (
-                      <Copy size={12} className="text-gray-500" />
+                      <Copy size={16} />
                     )}
                   </button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700">Mot de passe:</span>
-                <div className="flex items-center gap-1">
-                  <code className="text-xs bg-white px-2 py-1 rounded">
+              {/* Password */}
+              <div>
+                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+                  Mot de passe
+                </label>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 text-sm bg-gray-50 px-3 py-2 rounded-lg border font-mono">
                     {showPasswords ? data.password : '••••••••'}
                   </code>
                   <button
                     onClick={() => copyToClipboard(data.password, `${type}-password`)}
-                    className="p-1 hover:bg-white rounded transition-colors"
+                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                     title="Copier le mot de passe"
                   >
                     {copiedAccount === `${type}-password` ? (
-                      <Check size={12} className="text-green-600" />
+                      <Check size={16} className="text-green-600" />
                     ) : (
-                      <Copy size={12} className="text-gray-500" />
+                      <Copy size={16} />
                     )}
                   </button>
                 </div>
               </div>
+
+              {/* Quick Login Button */}
+              <button
+                onClick={() => {
+                  // Auto-fill login form (if available)
+                  const emailInput = document.querySelector('input[type="email"]')
+                  const passwordInput = document.querySelector('input[type="password"]')
+                  if (emailInput && passwordInput) {
+                    emailInput.value = data.email
+                    passwordInput.value = data.password
+                    emailInput.dispatchEvent(new Event('input', { bubbles: true }))
+                    passwordInput.dispatchEvent(new Event('input', { bubbles: true }))
+                  }
+                }}
+                className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
+                  type === 'admin' 
+                    ? 'bg-red-600 hover:bg-red-700 text-white' 
+                    : type === 'staff'
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-green-600 hover:bg-green-700 text-white'
+                }`}
+              >
+                Remplir automatiquement
+              </button>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-        <div className="flex items-start gap-2">
-          <span className="text-yellow-600">⚠️</span>
-          <div className="text-sm text-yellow-800">
-            <p className="font-medium mb-1">Mode Démonstration</p>
-            <p>
-              Cette version fonctionne sans backend. Les données sont simulées et ne sont pas persistantes.
-              Pour une version complète avec base de données, contactez-nous.
+      {/* Info Banner */}
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+        <div className="flex items-start gap-3">
+          <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span className="text-amber-600 text-sm">ℹ️</span>
+          </div>
+          <div className="text-sm">
+            <p className="font-medium text-amber-800 mb-1">Mode Démonstration</p>
+            <p className="text-amber-700">
+              Cette version fonctionne sans backend réel. Les données sont simulées et ne persistent pas entre les sessions.
+              <br />
+              <span className="font-medium">Pour une version complète avec base de données, contactez-nous !</span>
             </p>
           </div>
         </div>
