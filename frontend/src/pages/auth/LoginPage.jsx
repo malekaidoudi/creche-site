@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
-import { Eye, EyeOff, LogIn } from 'lucide-react'
+import { Eye, EyeOff, LogIn, ArrowLeft } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useLanguage } from '../../hooks/useLanguage'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
+import DemoAccountsInfo from '../../components/demo/DemoAccountsInfo'
 import LanguageToggle from '../../components/ui/LanguageToggle'
 
 const LoginPage = () => {
@@ -68,6 +68,9 @@ const LoginPage = () => {
               }
             </p>
           </div>
+
+          {/* Comptes de démonstration */}
+          {import.meta.env.PROD && <DemoAccountsInfo />}
 
           {/* Formulaire */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

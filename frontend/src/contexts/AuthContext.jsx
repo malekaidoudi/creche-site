@@ -120,6 +120,11 @@ export function AuthProvider({ children }) {
       
       localStorage.setItem('token', token)
       
+      // En mode démo, sauvegarder l'utilisateur
+      if (token === 'demo-jwt-token-for-github-pages') {
+        localStorage.setItem('demoUser', JSON.stringify(user))
+      }
+      
       dispatch({
         type: AUTH_ACTIONS.LOGIN_SUCCESS,
         payload: { user, token },

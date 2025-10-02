@@ -73,6 +73,9 @@ public/
 # Exception pour les pages publiques du frontend et assets
 !frontend/src/pages/public/
 !frontend/public/
+!frontend/public/images/
+!frontend/public/assets/
+!frontend/src/assets/
 
 # Vite build output
 dist/
