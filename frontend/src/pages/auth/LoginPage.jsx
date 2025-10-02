@@ -16,19 +16,20 @@ const LoginPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const [showPassword, setShowPassword] = useState(false)
-
   const from = location.state?.from?.pathname || '/dashboard'
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
-    setError
+    reset
   } = useForm()
 
   const onSubmit = async (data) => {
     try {
       await login(data)
+      reset()
       navigate(from, { replace: true })
     } catch (error) {
       if (error.response?.data?.details) {
@@ -71,7 +72,14 @@ const LoginPage = () => {
           </div>
 
           {/* Comptes de démonstration */}
-          {import.meta.env.PROD && <DemoAccountsInfo />}
+          {import.meta.env.PROD && (
+            <DemoAccountsInfo 
+              onFillForm={(email, password) => {
+                setValue('email', email, { shouldValidate: true })
+                setValue('password', password, { shouldValidate: true })
+              }}
+            />
+          )}
 
           {/* Formulaire */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

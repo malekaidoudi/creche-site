@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Eye, EyeOff, Copy, Check } from 'lucide-react'
 import { demoAccounts } from '../../data/demoAccounts'
 
-const DemoAccountsInfo = () => {
+const DemoAccountsInfo = ({ onFillForm }) => {
   const [showPasswords, setShowPasswords] = useState(false)
   const [copiedAccount, setCopiedAccount] = useState(null)
 
@@ -141,36 +141,26 @@ const DemoAccountsInfo = () => {
               {/* Quick Login Button */}
               <button
                 onClick={() => {
-                  // Copier les identifiants dans le presse-papiers et notifier l'utilisateur
-                  copyToClipboard(`${data.email}`, `${type}-quick-email`)
-                  copyToClipboard(`${data.password}`, `${type}-quick-password`)
-                  
-                  // Essayer de remplir automatiquement si possible
-                  const emailInput = document.querySelector('input[id="email"]')
-                  const passwordInput = document.querySelector('input[id="password"]')
-                  
-                  if (emailInput && passwordInput) {
-                    // Méthode plus compatible avec React Hook Form
-                    emailInput.value = data.email
-                    passwordInput.value = data.password
-                    
-                    // Déclencher les événements natifs
-                    emailInput.dispatchEvent(new Event('input', { bubbles: true }))
-                    emailInput.dispatchEvent(new Event('change', { bubbles: true }))
-                    passwordInput.dispatchEvent(new Event('input', { bubbles: true }))
-                    passwordInput.dispatchEvent(new Event('change', { bubbles: true }))
+                  if (onFillForm) {
+                    // Utiliser la fonction fournie par le parent (React Hook Form)
+                    onFillForm(data.email, data.password)
                     
                     // Notification de succès
                     setTimeout(() => {
-                      if (window.toast) {
-                        window.toast.success('Champs remplis automatiquement !')
-                      }
+                      import('react-hot-toast').then(toast => {
+                        toast.default.success('Champs remplis automatiquement !')
+                      })
                     }, 100)
                   } else {
-                    // Si le remplissage automatique ne fonctionne pas, au moins copier
-                    if (window.toast) {
-                      window.toast.success('Identifiants copiés ! Collez-les dans le formulaire.')
-                    }
+                    // Fallback : copier dans le presse-papiers
+                    copyToClipboard(data.email, `${type}-email`)
+                    copyToClipboard(data.password, `${type}-password`)
+                    
+                    setTimeout(() => {
+                      import('react-hot-toast').then(toast => {
+                        toast.default.success('Identifiants copiés ! Collez-les dans le formulaire.')
+                      })
+                    }, 100)
                   }
                 }}
                 className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
@@ -181,7 +171,7 @@ const DemoAccountsInfo = () => {
                     : 'bg-green-600 hover:bg-green-700 text-white'
                 }`}
               >
-                Utiliser ce compte
+                ✨ Utiliser ce compte
               </button>
             </div>
           </div>
@@ -198,6 +188,8 @@ const DemoAccountsInfo = () => {
             <p className="font-medium text-amber-800 mb-1">Mode Démonstration</p>
             <p className="text-amber-700">
               Cette version fonctionne sans backend réel. Les données sont simulées et ne persistent pas entre les sessions.
+              <br />
+              <span className="font-medium">💡 Cliquez sur "✨ Utiliser ce compte" pour remplir automatiquement le formulaire de connexion.</span>
               <br />
               <span className="font-medium">Pour une version complète avec base de données, contactez-nous !</span>
             </p>
