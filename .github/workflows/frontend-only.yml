@@ -48,10 +48,11 @@ jobs:
         name: frontend-dist
         path: frontend/dist
     
-    - name: Deploy to GitHub Pages
-      if: github.ref == 'refs/heads/main'
-      run: |
-        cd frontend
-        npm run deploy
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    # Deployment is done manually via npm run deploy
+    # - name: Deploy to GitHub Pages
+    #   if: github.ref == 'refs/heads/main'
+    #   run: |
+    #     cd frontend
+    #     npm run deploy
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
