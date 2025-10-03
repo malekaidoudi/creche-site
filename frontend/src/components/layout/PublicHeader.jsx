@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Menu, X, ChevronDown, Globe, User } from 'lucide-react'
+import { Menu, X, ChevronDown, Globe, User, LogOut } from 'lucide-react'
 import { useLanguage } from '../../hooks/useLanguage'
 import LanguageToggle from '../ui/LanguageToggle'
 import { ImageWithFallback, defaultImages } from '../../utils/imageUtils.jsx'
