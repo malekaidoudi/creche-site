@@ -1,6 +1,5 @@
 import { apiRequest } from './api'
-import { authenticateDemo, demoAccounts } from '../data/demoAccounts'
-import { forceDemo, debugAuth } from '../utils/debugAuth'
+import { authenticateDemo } from '../data/demoAccounts'
 
 export const authService = {
   // Connexion
