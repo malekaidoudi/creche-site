@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Search, Calendar, User, ArrowRight, Grid, List } from 'lucide-react'
+import { Search, Calendar, ArrowRight, Grid, List } from 'lucide-react'
 import { useLanguage } from '../../hooks/useLanguage'
 import { articleService } from '../../services/articleService'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowRight, Shield, Heart, GraduationCap, Users, Clock, Award, Star, Play, CheckCircle, Baby, Utensils, Gamepad2, User, Settings } from 'lucide-react'
+import { ArrowRight, Shield, Heart, GraduationCap, Users, Clock, Award, Star, Play, CheckCircle, Baby, Utensils, Gamepad2, User } from 'lucide-react'
 import { useLanguage } from '../../hooks/useLanguage'
 import { useAuth } from '../../hooks/useAuth'
 
