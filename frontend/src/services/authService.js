@@ -5,15 +5,24 @@ import { forceDemo, debugAuth } from '../utils/debugAuth'
 export const authService = {
   // Connexion
   login: async (credentials) => {
-    // Détection du mode démo avec debug
-    debugAuth()
-    const isDemo = forceDemo()
+    // FORCER LE MODE DÉMO POUR GITHUB PAGES
+    const isGitHubPages = typeof window !== 'undefined' && window.location.hostname.includes('github.io')
+    const isProduction = import.meta.env.PROD
     
-    if (isDemo) {
-      console.log('🎭 Mode démo activé - Utilisation des comptes de démonstration')
+    console.log('🔍 Vérification environnement:')
+    console.log('- Hostname:', typeof window !== 'undefined' ? window.location.hostname : 'undefined')
+    console.log('- GitHub Pages:', isGitHubPages)
+    console.log('- Production:', isProduction)
+    console.log('- Mode:', import.meta.env.MODE)
+    
+    // TOUJOURS utiliser le mode démo en production ou sur GitHub Pages
+    if (isProduction || isGitHubPages) {
+      console.log('🎭 FORCE MODE DÉMO - Utilisation des comptes de démonstration')
       return new Promise((resolve, reject) => {
         setTimeout(() => {
+          console.log('🔐 Authentification avec:', credentials.email, credentials.password)
           const result = authenticateDemo(credentials.email, credentials.password)
+          console.log('📊 Résultat authentification:', result)
           if (result.success) {
             resolve({ data: result.data })
           } else {
@@ -23,6 +32,7 @@ export const authService = {
       })
     }
     
+    console.log('🌐 Mode développement - Tentative API backend')
     return await apiRequest.post('/auth/login', credentials)
   },
 
@@ -33,10 +43,11 @@ export const authService = {
 
   // Obtenir l'utilisateur actuel
   getCurrentUser: async () => {
-    // En mode démo, retourner l'utilisateur depuis le localStorage
-    const isDemo = forceDemo()
+    // FORCER LE MODE DÉMO POUR GITHUB PAGES
+    const isGitHubPages = typeof window !== 'undefined' && window.location.hostname.includes('github.io')
+    const isProduction = import.meta.env.PROD
     
-    if (isDemo) {
+    if (isProduction || isGitHubPages) {
       const token = localStorage.getItem('token')
       if (token === 'demo-jwt-token-for-github-pages') {
         const userStr = localStorage.getItem('demoUser')

@@ -89,6 +89,28 @@ const LoginPage = () => {
             />
           )}
 
+          {/* Bouton de test direct (uniquement en production) */}
+          {import.meta.env.PROD && (
+            <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <h4 className="font-medium text-yellow-800 mb-2">🧪 Test Direct</h4>
+              <button
+                type="button"
+                onClick={async () => {
+                  console.log('🚀 TEST DIRECT CONNEXION ADMIN')
+                  try {
+                    await login({ email: 'admin@mimaelghalia.tn', password: 'admin123' })
+                    console.log('✅ Test réussi !')
+                  } catch (error) {
+                    console.error('❌ Test échoué:', error)
+                  }
+                }}
+                className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+              >
+                Tester connexion admin directement
+              </button>
+            </div>
+          )}
+
           {/* Formulaire */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Email */}

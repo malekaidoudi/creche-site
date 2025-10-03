@@ -104,32 +104,54 @@ export const demoToken = 'demo-jwt-token-for-github-pages'
 
 // Fonction pour simuler l'authentification
 export const authenticateDemo = (email, password) => {
-  console.log('🔐 Tentative d\'authentification démo:')
-  console.log('- Email reçu:', email)
-  console.log('- Password reçu:', password)
-  console.log('- Comptes disponibles:', Object.values(demoAccounts).map(acc => ({ email: acc.email, password: acc.password })))
+  console.log('🔐 === DÉBUT AUTHENTIFICATION DÉMO ===')
+  console.log('- Email reçu:', `"${email}"`, 'Type:', typeof email)
+  console.log('- Password reçu:', `"${password}"`, 'Type:', typeof password)
   
-  const account = Object.values(demoAccounts).find(
-    acc => acc.email === email && acc.password === password
-  )
+  // Vérifier que demoAccounts existe
+  console.log('- demoAccounts existe:', !!demoAccounts)
+  console.log('- Nombre de comptes:', Object.keys(demoAccounts).length)
   
-  console.log('- Compte trouvé:', account ? 'OUI' : 'NON')
+  // Afficher tous les comptes disponibles
+  const accounts = Object.values(demoAccounts)
+  console.log('- Comptes disponibles:')
+  accounts.forEach((acc, index) => {
+    console.log(`  ${index + 1}. Email: "${acc.email}" | Password: "${acc.password}" | Role: ${acc.role}`)
+  })
+  
+  // Recherche du compte
+  console.log('- Recherche du compte...')
+  const account = accounts.find(acc => {
+    const emailMatch = acc.email === email
+    const passwordMatch = acc.password === password
+    console.log(`  Test ${acc.role}: email=${emailMatch}, password=${passwordMatch}`)
+    return emailMatch && passwordMatch
+  })
+  
+  console.log('- Compte trouvé:', account ? `OUI (${account.role})` : 'NON')
   
   if (account) {
     const { password: _, ...userWithoutPassword } = account
-    console.log('✅ Authentification réussie pour:', userWithoutPassword.email)
-    return {
+    console.log('✅ AUTHENTIFICATION RÉUSSIE')
+    console.log('- Utilisateur:', userWithoutPassword)
+    console.log('- Token:', demoToken)
+    
+    const result = {
       success: true,
       data: {
         user: userWithoutPassword,
         token: demoToken
       }
     }
+    console.log('- Résultat final:', result)
+    return result
   }
   
-  console.log('❌ Authentification échouée')
-  return {
+  console.log('❌ AUTHENTIFICATION ÉCHOUÉE')
+  const errorResult = {
     success: false,
     error: 'Email ou mot de passe incorrect'
   }
+  console.log('- Résultat d\'erreur:', errorResult)
+  return errorResult
 }
