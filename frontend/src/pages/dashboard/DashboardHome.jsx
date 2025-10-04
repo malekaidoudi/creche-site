@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Users, Baby, Calendar, UserPlus, TrendingUp, Clock } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useLanguage } from '../../hooks/useLanguage'
+import { dashboardService } from '../../services/dashboardService'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
 
 const DashboardHome = () => {
@@ -12,35 +13,60 @@ const DashboardHome = () => {
   const { isRTL } = useLanguage()
   const navigate = useNavigate()
   const [stats, setStats] = useState({
-    totalUsers: 0,
     totalChildren: 0,
     todayAttendance: 0,
-    pendingEnrollments: 0
+    pendingEnrollments: 0,
+    attendanceRate: 0
   })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Simuler le chargement des statistiques
-    setTimeout(() => {
-      setStats({
-        totalUsers: 45,
-        totalChildren: 32,
-        todayAttendance: 28,
-        pendingEnrollments: 5
-      })
-      setLoading(false)
-    }, 1000)
+    loadDashboardStats()
   }, [])
 
+  const loadDashboardStats = async () => {
+    try {
+      setLoading(true)
+      
+      // Charger les statistiques selon le rôle de l'utilisateur
+      let statsData
+      if (user?.role === 'admin') {
+        statsData = await dashboardService.getAdminStats()
+      } else if (user?.role === 'staff') {
+        statsData = await dashboardService.getStaffStats()
+        // Adapter les données pour l'affichage
+        statsData = {
+          totalChildren: statsData.totalChildren,
+          todayAttendance: statsData.presentToday,
+          pendingEnrollments: 0, // Staff ne voit pas les inscriptions
+          attendanceRate: statsData.attendanceRate
+        }
+      } else {
+        // Pour les parents, on affiche des stats différentes
+        statsData = {
+          totalChildren: 0,
+          todayAttendance: 0,
+          pendingEnrollments: 0,
+          attendanceRate: 0
+        }
+      }
+
+      setStats(statsData)
+    } catch (error) {
+      console.error('Erreur lors du chargement des statistiques:', error)
+      // Fallback sur des données vides en cas d'erreur
+      setStats({
+        totalChildren: 0,
+        todayAttendance: 0,
+        pendingEnrollments: 0,
+        attendanceRate: 0
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const statsCards = [
-    {
-      title: t('dashboard.stats.totalUsers'),
-      value: stats.totalUsers,
-      icon: Users,
-      color: 'bg-blue-500',
-      bgColor: 'bg-blue-50',
-      textColor: 'text-blue-600'
-    },
     {
       title: t('dashboard.stats.totalChildren'),
       value: stats.totalChildren,
@@ -58,9 +84,9 @@ const DashboardHome = () => {
       textColor: 'text-purple-600'
     },
     {
-      title: t('dashboard.stats.pendingEnrollments'),
-      value: stats.pendingEnrollments,
-      icon: UserPlus,
+      title: user?.role === 'admin' ? t('dashboard.stats.pendingEnrollments') : t('dashboard.stats.attendanceRate'),
+      value: user?.role === 'admin' ? stats.pendingEnrollments : `${stats.attendanceRate}%`,
+      icon: user?.role === 'admin' ? UserPlus : TrendingUp,
       color: 'bg-orange-500',
       bgColor: 'bg-orange-50',
       textColor: 'text-orange-600'

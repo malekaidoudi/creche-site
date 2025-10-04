@@ -150,6 +150,13 @@ const frTranslations = {
     emergencyContactPhone: 'Téléphone du contact d\'urgence',
     enrollmentDate: 'Date d\'inscription souhaitée',
     notes: 'Notes supplémentaires',
+    documents: 'Documents requis',
+    carnetMedical: 'Carnet médical',
+    acteNaissance: 'Acte de naissance',
+    certificatMedical: 'Certificat médical',
+    documentsInfo: 'Veuillez télécharger tous les documents requis',
+    reglement: 'Règlement intérieur',
+    downloadReglement: 'Télécharger le règlement',
     submit: 'Soumettre la demande',
     success: 'Demande d\'inscription envoyée avec succès'
   },
@@ -178,7 +185,8 @@ const frTranslations = {
       totalUsers: 'Total utilisateurs',
       totalChildren: 'Total enfants',
       todayAttendance: 'Présences aujourd\'hui',
-      pendingEnrollments: 'Inscriptions en attente'
+      pendingEnrollments: 'Inscriptions en attente',
+      attendanceRate: 'Taux de présence'
     }
   },
   children: {
@@ -396,6 +404,13 @@ const arTranslations = {
     emergencyContactPhone: 'هاتف جهة اتصال الطوارئ',
     enrollmentDate: 'تاريخ التسجيل المرغوب',
     notes: 'ملاحظات إضافية',
+    documents: 'الوثائق المطلوبة',
+    carnetMedical: 'الدفتر الطبي',
+    acteNaissance: 'مضمون الولادة',
+    certificatMedical: 'الشهادة الطبية',
+    documentsInfo: 'يرجى تحميل جميع الوثائق المطلوبة',
+    reglement: 'النظام الداخلي',
+    downloadReglement: 'تحميل النظام الداخلي',
     submit: 'إرسال الطلب',
     success: 'تم إرسال طلب التسجيل بنجاح'
   },
@@ -424,7 +439,8 @@ const arTranslations = {
       totalUsers: 'إجمالي المستخدمين',
       totalChildren: 'إجمالي الأطفال',
       todayAttendance: 'حضور اليوم',
-      pendingEnrollments: 'التسجيلات المعلقة'
+      pendingEnrollments: 'التسجيلات المعلقة',
+      attendanceRate: 'معدل الحضور'
     }
   },
   children: {
@@ -502,7 +518,7 @@ i18n
   .init({
     fallbackLng: 'fr',
     debug: process.env.NODE_ENV === 'development',
-    
+
     resources: {
       fr: {
         translation: frTranslations

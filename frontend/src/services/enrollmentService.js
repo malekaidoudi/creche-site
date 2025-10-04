@@ -45,4 +45,22 @@ export const enrollmentService = {
     const response = await apiRequest.put(`/enrollments/${id}/status`, { status })
     return response.data
   },
+
+  // Approuver une inscription
+  approveEnrollment: async (id) => {
+    const response = await apiRequest.put(`/enrollments/${id}/approve`)
+    return response.data
+  },
+
+  // Rejeter une inscription
+  rejectEnrollment: async (id) => {
+    const response = await apiRequest.put(`/enrollments/${id}/reject`)
+    return response.data
+  },
+
+  // Voir les détails d'une inscription
+  viewEnrollment: async (id) => {
+    const response = await apiRequest.get(`/enrollments/${id}/details`)
+    return response.data
+  },
 }

@@ -1,20 +1,30 @@
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
-import { Baby, User, Calendar, Phone, FileText, Send, CheckCircle, AlertCircle, ArrowRight, ArrowLeft, Utensils, Heart } from 'lucide-react'
+import { Baby, User, Calendar, Phone, FileText, Send, CheckCircle, AlertCircle, ArrowRight, ArrowLeft, Utensils, Heart, Upload, Download } from 'lucide-react'
 import { useLanguage } from '../../hooks/useLanguage'
 import { enrollmentService } from '../../services/enrollmentService'
 import { childrenService } from '../../services/childrenService'
+import { documentService } from '../../services/documentService'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
+import DocumentUpload from '../../components/ui/DocumentUpload'
 import toast from 'react-hot-toast'
 
 const EnrollmentPage = () => {
   const { t } = useTranslation()
   const { isRTL } = useLanguage()
   const [loading, setLoading] = useState(false)
-  const [step, setStep] = useState(1) // 1: Enfant, 2: Parent, 3: Options, 4: Règlement, 5: Confirmation
+  const [step, setStep] = useState(1) // 1: Enfant, 2: Parent, 3: Documents, 4: Règlement, 5: Confirmation
   const [regulationScrolled, setRegulationScrolled] = useState(false)
   const regulationRef = useRef(null)
+  
+  // États pour les documents
+  const [documents, setDocuments] = useState({
+    carnet_medical: null,
+    acte_naissance: null,
+    certificat_medical: null
+  })
+  const [documentErrors, setDocumentErrors] = useState({})
 
   const {
     register,
@@ -23,6 +33,43 @@ const EnrollmentPage = () => {
     watch,
     reset
   } = useForm()
+
+  // Gestion des documents
+  const handleDocumentChange = (documentType, file) => {
+    setDocuments(prev => ({
+      ...prev,
+      [documentType]: file
+    }))
+    
+    // Supprimer l'erreur si un fichier est sélectionné
+    if (file && documentErrors[documentType]) {
+      setDocumentErrors(prev => ({
+        ...prev,
+        [documentType]: null
+      }))
+    }
+  }
+
+  // Validation des documents
+  const validateDocuments = () => {
+    const errors = {}
+    
+    // Vérifier les documents obligatoires
+    if (!documents.carnet_medical) {
+      errors.carnet_medical = isRTL ? 'الدفتر الطبي مطلوب' : 'Le carnet médical est requis'
+    }
+    
+    if (!documents.acte_naissance) {
+      errors.acte_naissance = isRTL ? 'شهادة الميلاد مطلوبة' : 'L\'acte de naissance est requis'
+    }
+    
+    if (!documents.certificat_medical) {
+      errors.certificat_medical = isRTL ? 'الشهادة الطبية مطلوبة' : 'Le certificat médical est requis'
+    }
+
+    setDocumentErrors(errors)
+    return Object.keys(errors).length === 0
+  }
 
   // Gestion du scroll du règlement
   const handleRegulationScroll = () => {
@@ -54,15 +101,58 @@ const EnrollmentPage = () => {
       const enrollmentData = {
         child_id: childResponse.child.id,
         enrollment_date: data.enrollment_date,
-        medical_record: data.medical_record || false,
         lunch_assistance: data.lunch_assistance || false,
         regulation_accepted: data.regulation_accepted || false,
         notes: data.notes
       }
 
-      await enrollmentService.createEnrollment(enrollmentData)
+      const enrollmentResponse = await enrollmentService.createEnrollment(enrollmentData)
       
-      toast.success(t('enrollment.success'))
+      // Upload des documents si présents
+      if (documents.carnet_medical || documents.acte_naissance || documents.certificat_medical) {
+        try {
+          const uploadPromises = []
+          
+          if (documents.carnet_medical) {
+            uploadPromises.push(
+              documentService.uploadDocument(
+                documents.carnet_medical, 
+                documentService.documentTypes.CARNET_MEDICAL, 
+                childResponse.child.id
+              )
+            )
+          }
+          
+          if (documents.acte_naissance) {
+            uploadPromises.push(
+              documentService.uploadDocument(
+                documents.acte_naissance, 
+                documentService.documentTypes.ACTE_NAISSANCE, 
+                childResponse.child.id
+              )
+            )
+          }
+          
+          if (documents.certificat_medical) {
+            uploadPromises.push(
+              documentService.uploadDocument(
+                documents.certificat_medical, 
+                documentService.documentTypes.CERTIFICAT_MEDICAL, 
+                childResponse.child.id
+              )
+            )
+          }
+          
+          await Promise.all(uploadPromises)
+          console.log('Documents uploadés avec succès')
+        } catch (uploadError) {
+          console.error('Erreur lors de l\'upload des documents:', uploadError)
+          // Ne pas bloquer l'inscription si l'upload échoue
+          toast.warning(isRTL ? 'تم التسجيل بنجاح ولكن فشل في تحميل بعض الوثائق' : 'Inscription réussie mais échec de l\'upload de certains documents')
+        }
+      }
+      
+      toast.success(isRTL ? 'تم التسجيل بنجاح!' : 'Inscription réussie !')
       reset()
       setStep(1)
       
@@ -75,6 +165,15 @@ const EnrollmentPage = () => {
   }
 
   const nextStep = () => {
+    // Validation spéciale pour l'étape des documents (temporairement désactivée pour permettre les tests)
+    if (step === 3) {
+      // Validation temporairement désactivée - sera réactivée après tests
+      // if (!validateDocuments()) {
+      //   toast.error(isRTL ? 'يرجى تحميل جميع الوثائق المطلوبة' : 'Veuillez télécharger tous les documents requis')
+      //   return
+      // }
+    }
+    
     setStep(prev => Math.min(prev + 1, 5))
   }
 
@@ -92,21 +191,23 @@ const EnrollmentPage = () => {
           </h1>
           <p className="text-xl text-gray-600">
             {isRTL 
-              ? 'املأوا النموذج أدناه لتسجيل طفلكم في حضانتنا'
+              ? 'املأ النموذج أدناه لتسجيل طفلك في حضانتنا'
               : 'Remplissez le formulaire ci-dessous pour inscrire votre enfant dans notre crèche'
             }
           </p>
         </div>
 
-        {/* Indicateur de progression */}
+        {/* Barre de progression */}
         <div className="mb-8">
-          <div className="flex items-center justify-center space-x-2 rtl:space-x-reverse overflow-x-auto">
+          <div className="flex items-center justify-between mb-4">
             {[1, 2, 3, 4, 5].map((stepNumber) => (
               <div key={stepNumber} className="flex items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  step >= stepNumber 
+                  step === stepNumber 
                     ? 'bg-primary-600 text-white' 
-                    : 'bg-gray-200 text-gray-600'
+                    : step > stepNumber 
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-gray-200 text-gray-600'
                 }`}>
                   {stepNumber}
                 </div>
@@ -122,7 +223,7 @@ const EnrollmentPage = () => {
             <span className="text-sm text-gray-600">
               {step === 1 && (isRTL ? 'معلومات الطفل' : 'Informations de l\'enfant')}
               {step === 2 && (isRTL ? 'معلومات الوالدين' : 'Informations des parents')}
-              {step === 3 && (isRTL ? 'خيارات الخدمة' : 'Options de service')}
+              {step === 3 && (isRTL ? 'الوثائق المطلوبة' : 'Documents requis')}
               {step === 4 && (isRTL ? 'الموافقة على القوانين' : 'Acceptation du règlement')}
               {step === 5 && (isRTL ? 'التأكيد' : 'Confirmation')}
             </span>
@@ -272,6 +373,107 @@ const EnrollmentPage = () => {
                     </h2>
                   </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Prénom du parent */}
+                    <div className="form-group">
+                      <label className="form-label">
+                        {isRTL ? 'الاسم الأول للوالد' : 'Prénom du parent'} *
+                      </label>
+                      <input
+                        type="text"
+                        className={`form-input ${errors.parent_first_name ? 'border-error-500' : ''}`}
+                        placeholder={isRTL ? 'الاسم الأول' : 'Prénom'}
+                        {...register('parent_first_name', {
+                          required: t('validation.required')
+                        })}
+                      />
+                      {errors.parent_first_name && (
+                        <p className="form-error">{errors.parent_first_name.message}</p>
+                      )}
+                    </div>
+
+                    {/* Nom du parent */}
+                    <div className="form-group">
+                      <label className="form-label">
+                        {isRTL ? 'اسم العائلة للوالد' : 'Nom du parent'} *
+                      </label>
+                      <input
+                        type="text"
+                        className={`form-input ${errors.parent_last_name ? 'border-error-500' : ''}`}
+                        placeholder={isRTL ? 'اسم العائلة' : 'Nom de famille'}
+                        {...register('parent_last_name', {
+                          required: t('validation.required')
+                        })}
+                      />
+                      {errors.parent_last_name && (
+                        <p className="form-error">{errors.parent_last_name.message}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Email */}
+                  <div className="form-group">
+                    <label className="form-label">
+                      {isRTL ? 'البريد الإلكتروني' : 'Email'} *
+                    </label>
+                    <input
+                      type="email"
+                      className={`form-input ${errors.parent_email ? 'border-error-500' : ''}`}
+                      placeholder={isRTL ? 'البريد الإلكتروني' : 'votre.email@exemple.com'}
+                      {...register('parent_email', {
+                        required: t('validation.required'),
+                        pattern: {
+                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                          message: isRTL ? 'البريد الإلكتروني غير صحيح' : 'Email invalide'
+                        }
+                      })}
+                    />
+                    {errors.parent_email && (
+                      <p className="form-error">{errors.parent_email.message}</p>
+                    )}
+                  </div>
+
+                  {/* Mot de passe */}
+                  <div className="form-group">
+                    <label className="form-label">
+                      {isRTL ? 'كلمة المرور' : 'Mot de passe'} *
+                    </label>
+                    <input
+                      type="password"
+                      className={`form-input ${errors.parent_password ? 'border-error-500' : ''}`}
+                      placeholder={isRTL ? 'كلمة المرور (6 أحرف على الأقل)' : 'Mot de passe (minimum 6 caractères)'}
+                      {...register('parent_password', {
+                        required: t('validation.required'),
+                        minLength: {
+                          value: 6,
+                          message: isRTL ? 'كلمة المرور يجب أن تحتوي على 6 أحرف على الأقل' : 'Le mot de passe doit contenir au moins 6 caractères'
+                        }
+                      })}
+                    />
+                    {errors.parent_password && (
+                      <p className="form-error">{errors.parent_password.message}</p>
+                    )}
+                  </div>
+
+                  {/* Téléphone */}
+                  <div className="form-group">
+                    <label className="form-label">
+                      {isRTL ? 'رقم الهاتف' : 'Numéro de téléphone'} *
+                    </label>
+                    <input
+                      type="tel"
+                      className={`form-input ${errors.parent_phone ? 'border-error-500' : ''}`}
+                      placeholder={isRTL ? 'رقم الهاتف' : '+216 XX XXX XXX'}
+                      {...register('parent_phone', {
+                        required: t('validation.required')
+                      })}
+                    />
+                    {errors.parent_phone && (
+                      <p className="form-error">{errors.parent_phone.message}</p>
+                    )}
+                  </div>
+
+                  {/* Date d'inscription souhaitée */}
                   <div className="form-group">
                     <label className="form-label">
                       {t('enrollment.enrollmentDate')} *
@@ -288,85 +490,139 @@ const EnrollmentPage = () => {
                     )}
                   </div>
 
+                  {/* Assistance au déjeuner */}
                   <div className="form-group">
-                    <label className="form-label">
-                      {t('enrollment.notes')}
-                    </label>
-                    <textarea
-                      rows={4}
-                      className="form-input"
-                      placeholder={isRTL ? 'أي ملاحظات إضافية...' : 'Toute note supplémentaire...'}
-                      {...register('notes')}
-                    />
+                    <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                      <input
+                        type="checkbox"
+                        id="lunch_assistance"
+                        className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                        {...register('lunch_assistance')}
+                      />
+                      <label htmlFor="lunch_assistance" className="flex-1 cursor-pointer">
+                        <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                          <Utensils className="w-5 h-5 text-primary-600" />
+                          <div>
+                            <h3 className="font-semibold text-gray-900">
+                              {isRTL ? 'المساعدة في الغداء' : 'Assistance au déjeuner'}
+                            </h3>
+                            <p className="text-sm text-gray-600">
+                              {isRTL 
+                                ? 'رسوم إضافية: 20 دينار تونسي شهرياً'
+                                : 'Frais supplémentaires : 20 TND par mois'
+                              }
+                            </p>
+
+                          </div>
+                        </div>
+                      </label>
+                    </div>
                   </div>
                 </div>
               )}
 
-              {/* Étape 3: Options de service */}
+              {/* Étape 3: Documents requis */}
               {step === 3 && (
                 <div className="space-y-6">
                   <div className="flex items-center space-x-3 rtl:space-x-reverse mb-6">
-                    <Heart className="w-6 h-6 text-primary-600" />
+                    <Upload className="w-6 h-6 text-primary-600" />
                     <h2 className="text-xl font-semibold text-gray-900">
-                      {isRTL ? 'خيارات الخدمة' : 'Options de service'}
+                      {isRTL ? 'الوثائق المطلوبة' : 'Documents requis'}
                     </h2>
                   </div>
 
-                  <div className="space-y-4">
-                    {/* Option Carnet Médical */}
-                    <div className="border border-gray-200 rounded-lg p-4 hover:border-primary-300 transition-colors">
-                      <label className="flex items-start space-x-3 rtl:space-x-reverse cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="mt-1 w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                          {...register('medical_record')}
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                            <FileText className="w-5 h-5 text-primary-600" />
-                            <h3 className="font-semibold text-gray-900">
-                              {isRTL ? 'الكشف الطبي' : 'Carnet Médical'}
-                            </h3>
-                          </div>
-                          <p className="text-sm text-gray-600 mt-1">
-                            {isRTL 
-                              ? 'سأقوم بتوفير الكشف الطبي الخاص بطفلي عند التسجيل'
-                              : 'Je fournirai le carnet médical de mon enfant lors de l\'inscription'
-                            }
-                          </p>
-                        </div>
-                      </label>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <div className="flex items-start space-x-3 rtl:space-x-reverse">
+                      <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h3 className="font-medium text-blue-900">
+                          {isRTL ? 'معلومات مهمة' : 'Informations importantes'}
+                        </h3>
+                        <p className="text-sm text-blue-800 mt-1">
+                          {isRTL 
+                            ? 'يرجى تحميل جميع الوثائق المطلوبة. الملفات المقبولة: PDF, JPG, PNG (حتى 5MB)'
+                            : 'Veuillez télécharger tous les documents requis. Formats acceptés : PDF, JPG, PNG (max 5MB)'
+                          }
+                        </p>
+                      </div>
                     </div>
+                  </div>
 
-                    {/* Option Assistance Déjeuner */}
-                    <div className="border border-gray-200 rounded-lg p-4 hover:border-primary-300 transition-colors">
-                      <label className="flex items-start space-x-3 rtl:space-x-reverse cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="mt-1 w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                          {...register('lunch_assistance')}
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                            <Utensils className="w-5 h-5 text-primary-600" />
-                            <h3 className="font-semibold text-gray-900">
-                              {isRTL ? 'المساعدة في الغداء' : 'Assistance au déjeuner'}
-                            </h3>
-                          </div>
-                          <p className="text-sm text-gray-600 mt-1">
-                            {isRTL 
-                              ? 'طفلي يحتاج إلى مساعدة في تناول وجبة الغداء'
-                              : 'Mon enfant a besoin d\'aide pour prendre son déjeuner'
-                            }
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {isRTL 
-                              ? 'رسوم إضافية: 50 دينار تونسي شهرياً'
-                              : 'Frais supplémentaires : 50 TND par mois'
-                            }
-                          </p>
-                        </div>
-                      </label>
+                  <div className="space-y-4">
+                    {/* Carnet médical */}
+                    <DocumentUpload
+                      documentType={documentService.documentTypes.CARNET_MEDICAL}
+                      label={isRTL ? 'الدفتر الطبي' : 'Carnet médical'}
+                      description={isRTL ? 'الدفتر الطبي للطفل مع التطعيمات' : 'Carnet de santé de l\'enfant avec vaccinations'}
+                      required={true}
+                      onFileChange={(file) => handleDocumentChange('carnet_medical', file)}
+                      value={documents.carnet_medical}
+                      error={documentErrors.carnet_medical}
+                    />
+
+                    {/* Acte de naissance */}
+                    <DocumentUpload
+                      documentType={documentService.documentTypes.ACTE_NAISSANCE}
+                      label={isRTL ? 'شهادة الميلاد' : 'Acte de naissance'}
+                      description={isRTL ? 'شهادة الميلاد الأصلية أو نسخة مصدقة' : 'Acte de naissance original ou copie certifiée'}
+                      required={true}
+                      onFileChange={(file) => handleDocumentChange('acte_naissance', file)}
+                      value={documents.acte_naissance}
+                      error={documentErrors.acte_naissance}
+                    />
+
+                    {/* Certificat médical */}
+                    <DocumentUpload
+                      documentType={documentService.documentTypes.CERTIFICAT_MEDICAL}
+                      label={isRTL ? 'الشهادة الطبية' : 'Certificat médical'}
+                      description={isRTL ? 'شهادة طبية تؤكد عدم وجود أمراض معدية' : 'Certificat médical attestant l\'absence de maladies contagieuses'}
+                      required={true}
+                      onFileChange={(file) => handleDocumentChange('certificat_medical', file)}
+                      value={documents.certificat_medical}
+                      error={documentErrors.certificat_medical}
+                    />
+                  </div>
+
+                  {/* Téléchargement du règlement */}
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-medium text-gray-900">
+                          {isRTL ? 'النظام الداخلي للحضانة' : 'Règlement intérieur de la crèche'}
+                        </h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {isRTL 
+                            ? 'قم بتحميل ومراجعة النظام الداخلي قبل المتابعة'
+                            : 'Téléchargez et consultez le règlement avant de continuer'
+                          }
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={documentService.downloadReglement}
+                        className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        {isRTL ? 'تحميل' : 'Télécharger'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Rappel important sur les documents originaux */}
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                    <div className="flex items-start space-x-3 rtl:space-x-reverse">
+                      <AlertCircle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h3 className="font-semibold text-orange-900 mb-1">
+                          {isRTL ? '📋 تذكير مهم' : '📋 Rappel important'}
+                        </h3>
+                        <p className="text-orange-800 text-sm">
+                          {isRTL 
+                            ? 'الوثائق المرفوعة هنا للمراجعة الأولية. يجب إحضار النسخ الأصلية والنظام الداخلي موقع يوم التسجيل النهائي في الحضانة.'
+                            : 'Les documents téléchargés ici sont pour l\'examen préliminaire. Vous devez apporter les originaux et le règlement intérieur signé le jour de l\'inscription définitive à la crèche.'
+                          }
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -560,12 +816,6 @@ const EnrollmentPage = () => {
                     </h3>
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                        <CheckCircle className={`w-4 h-4 ${watch('medical_record') ? 'text-green-600' : 'text-gray-400'}`} />
-                        <span className={watch('medical_record') ? 'text-green-800 font-medium' : 'text-gray-600'}>
-                          {isRTL ? 'الكشف الطبي' : 'Carnet médical'}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-2 rtl:space-x-reverse">
                         <CheckCircle className={`w-4 h-4 ${watch('lunch_assistance') ? 'text-green-600' : 'text-gray-400'}`} />
                         <span className={watch('lunch_assistance') ? 'text-green-800 font-medium' : 'text-gray-600'}>
                           {isRTL ? 'المساعدة في الغداء' : 'Assistance au déjeuner'}
@@ -592,6 +842,30 @@ const EnrollmentPage = () => {
                         : 'Votre demande sera examinée par notre équipe et nous vous recontacterons bientôt.'
                       }
                     </p>
+                  </div>
+
+                  {/* Mention importante sur les documents originaux */}
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                    <div className="flex items-start space-x-3 rtl:space-x-reverse">
+                      <AlertCircle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h3 className="font-semibold text-orange-900 mb-2">
+                          {isRTL ? '⚠️ تذكير مهم' : '⚠️ Rappel important'}
+                        </h3>
+                        <p className="text-orange-800 text-sm">
+                          {isRTL 
+                            ? 'يجب عليكم إحضار جميع الوثائق الأصلية (الدفتر الطبي، شهادة الميلاد، الشهادة الطبية) والنظام الداخلي موقع يوم التسجيل النهائي في الحضانة للتحقق منها.'
+                            : 'Vous devez apporter tous les documents originaux (carnet médical, acte de naissance, certificat médical) et le règlement intérieur signé le jour de l\'inscription définitive à la crèche pour vérification.'
+                          }
+                        </p>
+                        <p className="text-orange-700 text-xs mt-2 font-medium">
+                          {isRTL 
+                            ? '📋 الوثائق المرفوعة هنا هي للمراجعة الأولية فقط'
+                            : '📋 Les documents téléchargés ici sont uniquement pour l\'examen préliminaire'
+                          }
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}

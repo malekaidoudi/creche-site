@@ -40,7 +40,41 @@ const EnrollmentsPage = () => {
       loadEnrollments()
     } catch (error) {
       console.error('Erreur lors de la mise à jour:', error)
-      toast.error('Erreur lors de la mise à jour')
+      toast.error(error.response?.data?.error || 'Erreur lors de la mise à jour')
+    }
+  }
+
+  const handleApprove = async (enrollmentId) => {
+    try {
+      await enrollmentService.approveEnrollment(enrollmentId)
+      toast.success(isRTL ? 'تم قبول التسجيل' : 'Inscription approuvée')
+      loadEnrollments()
+    } catch (error) {
+      console.error('Erreur lors de l\'approbation:', error)
+      toast.error(error.response?.data?.error || 'Erreur lors de l\'approbation')
+    }
+  }
+
+  const handleReject = async (enrollmentId) => {
+    try {
+      await enrollmentService.rejectEnrollment(enrollmentId)
+      toast.success(isRTL ? 'تم رفض التسجيل' : 'Inscription rejetée')
+      loadEnrollments()
+    } catch (error) {
+      console.error('Erreur lors du rejet:', error)
+      toast.error(error.response?.data?.error || 'Erreur lors du rejet')
+    }
+  }
+
+  const handleView = async (enrollmentId) => {
+    try {
+      const response = await enrollmentService.viewEnrollment(enrollmentId)
+      setSelectedEnrollment(response.enrollment)
+      // Ici vous pouvez ouvrir un modal ou naviguer vers une page de détails
+      console.log('Détails de l\'inscription:', response.enrollment)
+    } catch (error) {
+      console.error('Erreur lors de la consultation:', error)
+      toast.error(error.response?.data?.error || 'Erreur lors de la consultation')
     }
   }
 
@@ -182,8 +216,95 @@ const EnrollmentsPage = () => {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
+            <>
+              {/* Vue mobile - Cartes */}
+              <div className="sm:hidden space-y-4 p-4">
+                {filteredEnrollments.map((enrollment) => {
+                  const statusConfig = getStatusBadge(enrollment.status)
+                  const StatusIcon = statusConfig.icon
+                  
+                  return (
+                    <div key={enrollment.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-10 w-10">
+                            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center text-white text-lg">
+                              {getGenderIcon(enrollment.child?.gender)}
+                            </div>
+                          </div>
+                          <div className="ml-3 rtl:ml-0 rtl:mr-3">
+                            <div className="text-sm font-medium text-gray-900">
+                              {enrollment.child?.first_name} {enrollment.child?.last_name}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {enrollment.child?.birth_date && new Date(enrollment.child.birth_date).toLocaleDateString()}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center">
+                          <StatusIcon className="w-4 h-4 mr-1 rtl:mr-0 rtl:ml-1" />
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusConfig.color}`}>
+                            {statusConfig.text}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="mb-3">
+                        <div className="flex items-center text-xs text-gray-500 mb-1">
+                          <Calendar className="w-3 h-3 mr-1 rtl:mr-0 rtl:ml-1" />
+                          {new Date(enrollment.enrollment_date).toLocaleDateString()}
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {enrollment.lunch_assistance && (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                              <Utensils className="w-3 h-3 mr-1 rtl:mr-0 rtl:ml-1" />
+                              {isRTL ? 'غداء' : 'Repas'}
+                            </span>
+                          )}
+                          {enrollment.regulation_accepted && (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              <CheckCircle className="w-3 h-3 mr-1 rtl:mr-0 rtl:ml-1" />
+                              {isRTL ? 'قوانين' : 'Règlement'}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleView(enrollment.id)}
+                          className="flex-1 bg-indigo-50 text-indigo-700 px-3 py-2 rounded-md text-sm font-medium hover:bg-indigo-100 transition-colors"
+                        >
+                          <Eye className="w-4 h-4 inline mr-1 rtl:mr-0 rtl:ml-1" />
+                          {isRTL ? 'عرض' : 'Voir'}
+                        </button>
+                        {enrollment.status === 'pending' && (
+                          <>
+                            <button
+                              onClick={() => handleApprove(enrollment.id)}
+                              className="flex-1 bg-green-50 text-green-700 px-3 py-2 rounded-md text-sm font-medium hover:bg-green-100 transition-colors"
+                            >
+                              <CheckCircle className="w-4 h-4 inline mr-1 rtl:mr-0 rtl:ml-1" />
+                              {isRTL ? 'قبول' : 'Approuver'}
+                            </button>
+                            <button
+                              onClick={() => handleReject(enrollment.id)}
+                              className="flex-1 bg-red-50 text-red-700 px-3 py-2 rounded-md text-sm font-medium hover:bg-red-100 transition-colors"
+                            >
+                              <XCircle className="w-4 h-4 inline mr-1 rtl:mr-0 rtl:ml-1" />
+                              {isRTL ? 'رفض' : 'Rejeter'}
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Vue desktop - Tableau */}
+              <div className="hidden sm:block overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left rtl:text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -235,12 +356,6 @@ const EnrollmentsPage = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex flex-wrap gap-1">
-                            {enrollment.medical_record && (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                <Heart className="w-3 h-3 mr-1 rtl:mr-0 rtl:ml-1" />
-                                {isRTL ? 'طبي' : 'Médical'}
-                              </span>
-                            )}
                             {enrollment.lunch_assistance && (
                               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
                                 <Utensils className="w-3 h-3 mr-1 rtl:mr-0 rtl:ml-1" />
@@ -266,8 +381,8 @@ const EnrollmentsPage = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex space-x-2 rtl:space-x-reverse">
                             <button
-                              onClick={() => setSelectedEnrollment(enrollment)}
-                              className="text-indigo-600 hover:text-indigo-900"
+                              onClick={() => handleView(enrollment.id)}
+                              className="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50"
                               title={isRTL ? 'عرض' : 'Voir'}
                             >
                               <Eye className="w-4 h-4" />
@@ -275,15 +390,15 @@ const EnrollmentsPage = () => {
                             {enrollment.status === 'pending' && (
                               <>
                                 <button
-                                  onClick={() => handleStatusChange(enrollment.id, 'approved')}
-                                  className="text-green-600 hover:text-green-900"
+                                  onClick={() => handleApprove(enrollment.id)}
+                                  className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50"
                                   title={isRTL ? 'قبول' : 'Approuver'}
                                 >
                                   <CheckCircle className="w-4 h-4" />
                                 </button>
                                 <button
-                                  onClick={() => handleStatusChange(enrollment.id, 'rejected')}
-                                  className="text-red-600 hover:text-red-900"
+                                  onClick={() => handleReject(enrollment.id)}
+                                  className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
                                   title={isRTL ? 'رفض' : 'Rejeter'}
                                 >
                                   <XCircle className="w-4 h-4" />
@@ -296,8 +411,9 @@ const EnrollmentsPage = () => {
                     )
                   })}
                 </tbody>
-              </table>
-            </div>
+                </table>
+              </div>
+            </>
           )}
         </div>
       </div>

@@ -1,15 +1,20 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { User, Calendar, MessageSquare, Edit3, CheckCircle, XCircle, Clock, AlertCircle, Camera, Download } from 'lucide-react'
+import { User, Calendar, MessageSquare, Edit3, CheckCircle, XCircle, Clock, AlertCircle, Camera, Download, Baby } from 'lucide-react'
 import { useLanguage } from '../../hooks/useLanguage'
 import { useAuth } from '../../hooks/useAuth'
+import { dashboardService } from '../../services/dashboardService'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
+import toast from 'react-hot-toast'
 
 const ParentDashboard = () => {
   const { t } = useTranslation()
   const { isRTL } = useLanguage()
   const { user, logout } = useAuth()
   const [loading, setLoading] = useState(true)
+  const [myChildren, setMyChildren] = useState([])
+  const [todayAttendance, setTodayAttendance] = useState([])
+  const [weekAttendance, setWeekAttendance] = useState([])
   const [showAbsenceForm, setShowAbsenceForm] = useState(false)
   const [selectedDate, setSelectedDate] = useState(null)
   const [unreadMessages, setUnreadMessages] = useState(3)
@@ -21,9 +26,34 @@ const ParentDashboard = () => {
   })
 
   useEffect(() => {
-    // Simuler le chargement des données
-    setTimeout(() => setLoading(false), 1000)
-  }, [])
+    loadParentData()
+  }, [user])
+
+  const loadParentData = async () => {
+    if (!user) return
+    
+    try {
+      setLoading(true)
+      
+      // Utiliser le service dashboard pour récupérer les données du parent
+      const parentData = await dashboardService.getParentData(user.id, user.email)
+      
+      setMyChildren(parentData.children)
+      setTodayAttendance(parentData.todayAttendance)
+      setWeekAttendance(parentData.weekAttendance)
+      
+    } catch (error) {
+      console.error('Erreur lors du chargement des données parent:', error)
+      toast.error('Erreur lors du chargement des données')
+      
+      // Fallback sur des données vides
+      setMyChildren([])
+      setTodayAttendance([])
+      setWeekAttendance([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Données simulées pour la démonstration
   const todayReport = {
@@ -120,6 +150,77 @@ const ParentDashboard = () => {
 
       {/* Contenu principal - scroll vertical */}
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-8">
+        
+        {/* Section 0: Mes enfants */}
+        {myChildren.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+              <Baby className="w-6 h-6 mr-3 text-blue-600" />
+              {isRTL ? 'أطفالي' : 'Mes enfants'}
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {myChildren.map((child) => {
+                const isPresent = todayAttendance.some(att => att.child_id === child.id)
+                return (
+                  <div key={child.id} className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <h3 className="font-semibold text-gray-900">
+                          {child.first_name} {child.last_name}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {isRTL ? 'العمر:' : 'Âge:'} {child.birth_date ? 
+                            Math.floor((new Date() - new Date(child.birth_date)) / (365.25 * 24 * 60 * 60 * 1000)) : 'N/A'} 
+                          {isRTL ? ' سنة' : ' ans'}
+                        </p>
+                      </div>
+                      
+                      <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        isPresent 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {isPresent 
+                          ? (isRTL ? 'حاضر' : 'Présent') 
+                          : (isRTL ? 'غائب' : 'Absent')
+                        }
+                      </div>
+                    </div>
+                    
+                    {child.medical_info && (
+                      <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p className="text-sm text-yellow-800">
+                          <AlertCircle className="w-4 h-4 inline mr-1" />
+                          {child.medical_info}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Message si aucun enfant */}
+        {myChildren.length === 0 && (
+          <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+            <Baby className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              {isRTL ? 'لا توجد أطفال مسجلون' : 'Aucun enfant enregistré'}
+            </h3>
+            <p className="text-gray-600 mb-4">
+              {isRTL ? 'لم يتم العثور على أطفال مرتبطين بحسابك' : 'Aucun enfant n\'est associé à votre compte'}
+            </p>
+            <button 
+              onClick={() => window.location.href = '/enrollment'}
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              {isRTL ? 'تسجيل طفل جديد' : 'Inscrire un enfant'}
+            </button>
+          </div>
+        )}
         
         {/* Section 1: Récap du jour */}
         <div className="bg-white rounded-2xl shadow-lg p-6">

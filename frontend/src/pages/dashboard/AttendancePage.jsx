@@ -42,23 +42,31 @@ const AttendancePage = () => {
 
   const handleCheckIn = async (childId) => {
     try {
-      await attendanceService.checkIn(childId, selectedDate)
+      await attendanceService.checkIn({
+        child_id: childId,
+        check_in_time: new Date().toISOString(),
+        date: selectedDate
+      })
       toast.success(isRTL ? 'تم تسجيل الدخول بنجاح' : 'Entrée enregistrée avec succès')
       loadData()
     } catch (error) {
       console.error('Erreur check-in:', error)
-      toast.error('Erreur lors de l\'enregistrement')
+      toast.error(error.response?.data?.error || 'Erreur lors de l\'enregistrement')
     }
   }
 
   const handleCheckOut = async (childId) => {
     try {
-      await attendanceService.checkOut(childId, selectedDate)
+      await attendanceService.checkOut({
+        child_id: childId,
+        check_out_time: new Date().toISOString(),
+        date: selectedDate
+      })
       toast.success(isRTL ? 'تم تسجيل الخروج بنجاح' : 'Sortie enregistrée avec succès')
       loadData()
     } catch (error) {
       console.error('Erreur check-out:', error)
-      toast.error('Erreur lors de l\'enregistrement')
+      toast.error(error.response?.data?.error || 'Erreur lors de l\'enregistrement')
     }
   }
 
